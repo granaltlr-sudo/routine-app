@@ -33,7 +33,7 @@
     }
 
     .wrap {
-      max-width: 980px;
+      max-width: 1080px;
       margin: 0 auto;
       display: grid;
       gap: 20px;
@@ -67,9 +67,26 @@
       gap: 20px;
     }
 
-    @media (max-width: 860px) {
-      .grid { grid-template-columns: 1fr; }
-      body { padding: 14px; }
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      body {
+        padding: 14px;
+      }
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 180px;
+      gap: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
     }
 
     label {
@@ -92,18 +109,8 @@
     }
 
     textarea {
-      min-height: 240px;
+      min-height: 180px;
       resize: vertical;
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 180px;
-      gap: 14px;
-    }
-
-    @media (max-width: 640px) {
-      .row { grid-template-columns: 1fr; }
     }
 
     .actions {
@@ -123,7 +130,9 @@
       transition: transform 0.08s ease, opacity 0.15s ease;
     }
 
-    button:active { transform: scale(0.985); }
+    button:active {
+      transform: scale(0.985);
+    }
 
     .primary {
       background: var(--grad);
@@ -136,17 +145,81 @@
       border: 1px solid var(--border);
     }
 
+    .danger {
+      background: rgba(239,68,68,0.14);
+      color: #fecaca;
+      border: 1px solid rgba(239,68,68,0.28);
+    }
+
+    .help {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+      margin-top: 10px;
+    }
+
     .output {
       background: #0a0d12;
       border: 1px solid var(--border);
       border-radius: 18px;
       padding: 14px;
-      min-height: 180px;
+      min-height: 140px;
       overflow: auto;
       font-size: 13px;
       line-height: 1.7;
       white-space: pre-wrap;
       word-break: break-word;
+    }
+
+    .task-list {
+      background: #0a0d12;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 8px 14px;
+      min-height: 120px;
+    }
+
+    .task-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .task-row:last-child {
+      border-bottom: 0;
+    }
+
+    .task-label {
+      font-size: 16px;
+      line-height: 1.5;
+      word-break: break-word;
+      padding-right: 8px;
+    }
+
+    .mini-btn {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mini-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+      padding: 10px 0;
     }
 
     .preview-box {
@@ -159,11 +232,11 @@
       top: 24px;
     }
 
-    .phone-screen {
+    .phone-task {
       border-radius: 24px;
       border: 1px solid rgba(255,255,255,0.06);
       background: rgba(255,255,255,0.02);
-      min-height: 420px;
+      min-height: 380px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -204,16 +277,11 @@
       text-align: center;
     }
 
-    .help {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.7;
-      margin-top: 10px;
-    }
-
-    .ok {
-      color: #d5e6b2;
-      font-weight: 700;
+    .section-title {
+      margin-top: 18px;
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: 800;
     }
   </style>
 </head>
@@ -221,7 +289,7 @@
   <div class="wrap">
     <section class="card">
       <h1 class="title">ルーチン設定</h1>
-      <p class="subtitle">パソコン側で内容を決めて、スマホ側の実行画面へ渡すための設定ページです。スマホでは考えず、ここでだけ順番を決める前提です。</p>
+      <p class="subtitle">パソコン側で、朝用・夕方用などのルーチンを作るためのページです。JSONは裏で自動生成されるので、普段はタスクを追加・並び替え・削除するだけで使えます。</p>
     </section>
 
     <section class="grid">
@@ -233,30 +301,46 @@
           </div>
           <div>
             <label for="routineId">routineId</label>
-            <input id="routineId" type="text" value="demo-evening" />
+            <input id="routineId" type="text" value="evening" />
           </div>
         </div>
 
-        <label for="taskInput">タスク一覧（1行につき1件）</label>
+        <label for="newTaskInput">タスクを1件追加</label>
+        <div class="row">
+          <div>
+            <input id="newTaskInput" type="text" placeholder="例：薬を飲む" />
+          </div>
+          <div>
+            <button class="primary" id="addTaskBtn" type="button">追加</button>
+          </div>
+        </div>
+
+        <div class="section-title">タスク一覧</div>
+        <div id="taskList" class="task-list"></div>
+
+        <p class="help">順番を変えたいときは ↑ ↓、いらないものは 削除 を押してください。</p>
+
+        <label for="taskInput">まとめ入力（1行につき1件）</label>
         <textarea id="taskInput">薬を飲む
 連絡帳を確認する
 明日の持ち物を確認する
 アラームをセットする</textarea>
 
+        <p class="help">大量に貼り付けたいときだけ、ここを直接編集してください。上の一覧にもすぐ反映されます。</p>
+
         <div class="actions">
-          <button class="primary" id="buildBtn">スマホ用データを作る</button>
-          <button class="secondary" id="copyJsonBtn">JSONをコピー</button>
-          <button class="secondary" id="copyUrlBtn">run.html用URLをコピー</button>
-          <button class="secondary" id="saveLocalBtn">この設定を保存</button>
+          <button class="primary" id="buildBtn" type="button">スマホ用データを作る</button>
+          <button class="secondary" id="copyJsonBtn" type="button">JSONをコピー</button>
+          <button class="secondary" id="copyUrlBtn" type="button">run用URLをコピー</button>
+          <button class="secondary" id="saveLocalBtn" type="button">この設定を保存</button>
+          <button class="danger" id="clearAllBtn" type="button">タスクを全消去</button>
         </div>
 
-        <p class="help">URLコピーは、同じ公開場所に <span class="ok">run.html</span> がある前提です。GitHub Pagesに置くなら、後で <span class="ok">run.html?data=...</span> 形式で使えます。</p>
-
-        <label for="jsonOutput">スマホへ渡すJSON</label>
-        <div id="jsonOutput" class="output"></div>
-
         <label for="urlBase">run.html のURLベース</label>
-        <input id="urlBase" type="text" placeholder="例: https://granaltlr-sudo.github.io/routine-app/run.html" />
+        <input id="urlBase" type="text" placeholder="例：https://granaltlr-sudo.github.io/routine-app/" />
+
+        <label for="jsonOutput">自動生成されたJSON</label>
+        <div id="jsonOutput" class="output"></div>
 
         <label for="urlOutput">生成したURL</label>
         <div id="urlOutput" class="output"></div>
@@ -264,27 +348,31 @@
 
       <div class="card preview-box">
         <div class="subtitle">スマホ表示プレビュー</div>
-        <div id="previewTask" class="phone-screen">薬を飲む</div>
+        <div id="previewTask" class="phone-task">薬を飲む</div>
         <div class="mini-bar"><div></div></div>
         <div class="mini-button">できた</div>
-        <div class="help">ここでは1件目だけを確認します。実行中はスマホ側で1件ずつ進みます。</div>
+        <div class="help">スマホ側では1件ずつ表示されます。ここでは1件目だけを確認できます。</div>
       </div>
     </section>
   </div>
 
   <script>
-    const STORAGE_KEY = 'routine-admin-config-v1';
+    const STORAGE_KEY = 'routine-admin-config-v2';
 
     const els = {
       routineName: document.getElementById('routineName'),
       routineId: document.getElementById('routineId'),
+      newTaskInput: document.getElementById('newTaskInput'),
+      addTaskBtn: document.getElementById('addTaskBtn'),
+      taskList: document.getElementById('taskList'),
       taskInput: document.getElementById('taskInput'),
       buildBtn: document.getElementById('buildBtn'),
       copyJsonBtn: document.getElementById('copyJsonBtn'),
       copyUrlBtn: document.getElementById('copyUrlBtn'),
       saveLocalBtn: document.getElementById('saveLocalBtn'),
-      jsonOutput: document.getElementById('jsonOutput'),
+      clearAllBtn: document.getElementById('clearAllBtn'),
       urlBase: document.getElementById('urlBase'),
+      jsonOutput: document.getElementById('jsonOutput'),
       urlOutput: document.getElementById('urlOutput'),
       previewTask: document.getElementById('previewTask')
     };
@@ -296,16 +384,63 @@
         .filter(Boolean);
     }
 
-    function buildRoutineData() {
-      const routineName = els.routineName.value.trim() || 'ルーチン';
-      const routineId = els.routineId.value.trim() || `routine-${Date.now()}`;
-      const tasks = getTasks();
+    function setTasks(tasks) {
+      els.taskInput.value = tasks.join('\n');
+      renderTaskList();
+      renderOutputs();
+    }
 
+    function buildRoutineData() {
       return {
-        routineId,
-        routineName,
-        tasks
+        routineId: els.routineId.value.trim() || `routine-${Date.now()}`,
+        routineName: els.routineName.value.trim() || 'ルーチン',
+        tasks: getTasks()
       };
+    }
+
+    function renderTaskList() {
+      const tasks = getTasks();
+      els.taskList.innerHTML = '';
+
+      if (tasks.length === 0) {
+        els.taskList.innerHTML = '<div class="empty-state">まだタスクがありません。上の入力欄に1件入れて「追加」を押してください。</div>';
+        return;
+      }
+
+      tasks.forEach((task, index) => {
+        const row = document.createElement('div');
+        row.className = 'task-row';
+
+        const label = document.createElement('div');
+        label.className = 'task-label';
+        label.textContent = `${index + 1}. ${task}`;
+
+        const upBtn = document.createElement('button');
+        upBtn.className = 'mini-btn';
+        upBtn.type = 'button';
+        upBtn.textContent = '↑';
+        upBtn.disabled = index === 0;
+        upBtn.addEventListener('click', () => moveTask(index, -1));
+
+        const downBtn = document.createElement('button');
+        downBtn.className = 'mini-btn';
+        downBtn.type = 'button';
+        downBtn.textContent = '↓';
+        downBtn.disabled = index === tasks.length - 1;
+        downBtn.addEventListener('click', () => moveTask(index, 1));
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'mini-btn';
+        deleteBtn.type = 'button';
+        deleteBtn.textContent = '削除';
+        deleteBtn.addEventListener('click', () => deleteTask(index));
+
+        row.appendChild(label);
+        row.appendChild(upBtn);
+        row.appendChild(downBtn);
+        row.appendChild(deleteBtn);
+        els.taskList.appendChild(row);
+      });
     }
 
     function renderOutputs() {
@@ -321,6 +456,32 @@
       } else {
         els.urlOutput.textContent = '';
       }
+    }
+
+    function addTask() {
+      const value = els.newTaskInput.value.trim();
+      if (!value) return;
+
+      const tasks = getTasks();
+      tasks.push(value);
+      els.newTaskInput.value = '';
+      setTasks(tasks);
+      els.newTaskInput.focus();
+    }
+
+    function moveTask(index, delta) {
+      const tasks = getTasks();
+      const nextIndex = index + delta;
+      if (nextIndex < 0 || nextIndex >= tasks.length) return;
+
+      [tasks[index], tasks[nextIndex]] = [tasks[nextIndex], tasks[index]];
+      setTasks(tasks);
+    }
+
+    function deleteTask(index) {
+      const tasks = getTasks();
+      tasks.splice(index, 1);
+      setTasks(tasks);
     }
 
     async function copyText(text) {
@@ -348,6 +509,7 @@
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return;
+
         const saved = JSON.parse(raw);
         els.routineName.value = saved.routineName || els.routineName.value;
         els.routineId.value = saved.routineId || els.routineId.value;
@@ -358,17 +520,36 @@
       }
     }
 
+    function clearAllTasks() {
+      if (!confirm('タスクを全部消しますか？')) return;
+      setTasks([]);
+    }
+
+    els.addTaskBtn.addEventListener('click', addTask);
     els.buildBtn.addEventListener('click', renderOutputs);
     els.copyJsonBtn.addEventListener('click', () => copyText(els.jsonOutput.textContent));
     els.copyUrlBtn.addEventListener('click', () => copyText(els.urlOutput.textContent));
     els.saveLocalBtn.addEventListener('click', saveLocal);
+    els.clearAllBtn.addEventListener('click', clearAllTasks);
+
+    els.newTaskInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addTask();
+      }
+    });
 
     els.routineName.addEventListener('input', renderOutputs);
     els.routineId.addEventListener('input', renderOutputs);
-    els.taskInput.addEventListener('input', renderOutputs);
     els.urlBase.addEventListener('input', renderOutputs);
 
+    els.taskInput.addEventListener('input', () => {
+      renderTaskList();
+      renderOutputs();
+    });
+
     loadLocal();
+    renderTaskList();
     renderOutputs();
   </script>
 </body>
