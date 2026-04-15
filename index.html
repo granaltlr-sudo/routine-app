@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="実行" />
+  <title>ルーチン実行</title>
+  <style>
+    :root {
+      --bg1: #000000;
+      --bg2: #000000;
+      --card: rgba(17, 17, 17, 0.96);
+      --text: #f9fafb;
+      --muted: #a1a1aa;
+      --accent: #22c55e;
+      --accentText: #052e16;
+      --shadow: 0 18px 42px rgba(0,0,0,0.5);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;
+      overscroll-behavior: none;
+    }
+
+    body {
+      min-height: 100dvh;
+    }
+
+    .app {
+      min-height: 100dvh;
+      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+      display: flex;
+      align-items: stretch;
+      background: #000;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      align-self: center;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .clock {
+      font-variant-numeric: tabular-nums;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .task-panel {
+      min-height: 50dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 24px 18px;
+      margin: 8px 0 18px;
+    }
+
+    .task-text {
+      font-size: clamp(38px, 9vw, 58px);
+      line-height: 1.35;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      word-break: break-word;
+    }
+
+    .meta {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .progressbar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progressbar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #e8b3b3 0%, #ead9a8 18%, #d5e6b2 38%, #a7d8c2 55%, #a7dfea 74%, #c6b7de 100%);
+      transition: width 0.22s ease;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 18px;
+      padding: 18px 18px;
+      font-size: 24px;
+      line-height: 1.2;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+    }
+
+    button:active {
+      transform: scale(0.985);
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #e8b3b3 0%, #ead9a8 18%, #d5e6b2 38%, #a7d8c2 55%, #a7dfea 74%, #c6b7de 100%);
+      color: #1f2937;
+      min-height: 76px;
+    }
+
+    .title {
+      margin: 8px 0 12px;
+      font-size: 30px;
+      line-height: 1.3;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .subtitle {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .empty-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      text-align: left;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .done-mark {
+      font-size: 64px;
+      text-align: center;
+      margin: 2px 0 10px;
+    }
+
+    .done-time {
+      text-align: center;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        padding: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="taskScreen" class="screen active">
+      <div class="card">
+        <div class="topbar">
+          <div class="clock" id="taskClock"></div>
+        </div>
+
+        <div class="task-panel">
+          <div class="task-text" id="taskText">読み込み中...</div>
+        </div>
+
+        <div class="meta">
+          <div class="progressbar" aria-hidden="true">
+            <div class="progressbar-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="doneButton" class="btn-primary">できた</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="doneScreen" class="screen">
+      <div class="card">
+        <div class="topbar">
+          <div class="clock" id="doneClock"></div>
+        </div>
+        <div class="done-mark">✅</div>
+        <h1 class="title">すべて完了しました</h1>
+        <p class="subtitle" id="doneMessage">おつかれさまでした。</p>
+        <div class="done-time" id="doneTime"></div>
+        <div class="actions" style="margin-top:20px;">
+          <button id="restartButton" class="btn-primary">もう一度ひらく</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="emptyScreen" class="screen">
+      <div class="card">
+        <div class="topbar">
+          <div class="clock" id="emptyClock"></div>
+        </div>
+        <h1 class="title">ルーチン設定がありません</h1>
+        <p class="subtitle">この画面はスマホ用の実行画面です。まずはパソコン側でルーチンを作り、設定データをこのページに渡してください。</p>
+        <div class="empty-list">
+          <div>必要な設定データの例:</div>
+          <div>・routineId</div>
+          <div>・routineName</div>
+          <div>・tasks（配列）</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const DEFAULT_ROUTINE = {
+      routineId: 'demo-evening',
+      routineName: '夜の支度',
+      tasks: [
+        '薬を飲む',
+        '連絡帳を確認する',
+        '明日の持ち物を確認する',
+        'アラームをセットする'
+      ]
+    };
+
+    const state = {
+      routine: null,
+      progress: null,
+      resumed: false
+    };
+
+    const els = {
+      taskScreen: document.getElementById('taskScreen'),
+      doneScreen: document.getElementById('doneScreen'),
+      emptyScreen: document.getElementById('emptyScreen'),
+      taskText: document.getElementById('taskText'),
+      progressFill: document.getElementById('progressFill'),
+      doneButton: document.getElementById('doneButton'),
+      restartButton: document.getElementById('restartButton'),
+      taskClock: document.getElementById('taskClock'),
+      doneClock: document.getElementById('doneClock'),
+      emptyClock: document.getElementById('emptyClock'),
+      doneMessage: document.getElementById('doneMessage'),
+      doneTime: document.getElementById('doneTime')
+    };
+
+    function todayKey() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function progressStorageKey(routineId) {
+      return `routine-progress:${routineId}:${todayKey()}`;
+    }
+
+    function nowText() {
+      return new Date().toLocaleTimeString('ja-JP', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function updateClocks() {
+      const t = nowText();
+      els.taskClock.textContent = t;
+      els.doneClock.textContent = t;
+      els.emptyClock.textContent = t;
+    }
+
+    function showScreen(name) {
+      els.taskScreen.classList.remove('active');
+      els.doneScreen.classList.remove('active');
+      els.emptyScreen.classList.remove('active');
+
+      if (name === 'task') els.taskScreen.classList.add('active');
+      if (name === 'done') els.doneScreen.classList.add('active');
+      if (name === 'empty') els.emptyScreen.classList.add('active');
+    }
+
+    function parseRoutineFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const encoded = params.get('data');
+      if (!encoded) return null;
+
+      try {
+        const json = decodeURIComponent(encoded);
+        const parsed = JSON.parse(json);
+        if (!parsed || !Array.isArray(parsed.tasks) || parsed.tasks.length === 0) {
+          return null;
+        }
+        return {
+          routineId: parsed.routineId || 'routine-' + Date.now(),
+          routineName: parsed.routineName || 'ルーチン',
+          tasks: parsed.tasks.filter(Boolean)
+        };
+      } catch (error) {
+        console.error('設定データ読み込み失敗', error);
+        return null;
+      }
+    }
+
+    function loadRoutine() {
+      const queryRoutine = parseRoutineFromQuery();
+      if (queryRoutine) {
+        localStorage.setItem('routine-last-config', JSON.stringify(queryRoutine));
+        return queryRoutine;
+      }
+
+      try {
+        const saved = localStorage.getItem('routine-last-config');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && Array.isArray(parsed.tasks) && parsed.tasks.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (error) {
+        console.error('保存済み設定読み込み失敗', error);
+      }
+
+      return DEFAULT_ROUTINE;
+    }
+
+    function loadProgress(routine) {
+      try {
+        const raw = localStorage.getItem(progressStorageKey(routine.routineId));
+        if (!raw) {
+          state.resumed = false;
+          return {
+            currentIndex: 0,
+            completed: false,
+            completedAt: null,
+            lastUpdatedAt: null
+          };
+        }
+        const parsed = JSON.parse(raw);
+        state.resumed = (parsed.currentIndex || 0) > 0 && !parsed.completed;
+        return {
+          currentIndex: Number.isInteger(parsed.currentIndex) ? parsed.currentIndex : 0,
+          completed: Boolean(parsed.completed),
+          completedAt: parsed.completedAt || null,
+          lastUpdatedAt: parsed.lastUpdatedAt || null
+        };
+      } catch (error) {
+        console.error('進捗読み込み失敗', error);
+        state.resumed = false;
+        return {
+          currentIndex: 0,
+          completed: false,
+          completedAt: null,
+          lastUpdatedAt: null
+        };
+      }
+    }
+
+    function saveProgress() {
+      const key = progressStorageKey(state.routine.routineId);
+      localStorage.setItem(key, JSON.stringify(state.progress));
+    }
+
+    function renderTask() {
+      if (!state.routine || !Array.isArray(state.routine.tasks) || state.routine.tasks.length === 0) {
+        showScreen('empty');
+        return;
+      }
+
+      if (state.progress.completed || state.progress.currentIndex >= state.routine.tasks.length) {
+        renderDone();
+        return;
+      }
+
+      const currentTask = state.routine.tasks[state.progress.currentIndex];
+      const progressPercent = (state.progress.currentIndex / state.routine.tasks.length) * 100;
+
+      els.taskText.textContent = currentTask;
+      els.progressFill.style.width = `${progressPercent}%`;
+
+      showScreen('task');
+    }
+
+    function renderDone() {
+      const finishedAt = state.progress.completedAt
+        ? new Date(state.progress.completedAt)
+        : new Date();
+      els.doneMessage.textContent = 'おつかれさまでした。';
+      els.doneTime.textContent = `完了時刻: ${finishedAt.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`;
+      showScreen('done');
+    }
+
+    function completeCurrentTask() {
+      if (!state.routine || !state.progress) return;
+
+      state.progress.currentIndex += 1;
+      state.progress.lastUpdatedAt = new Date().toISOString();
+      state.resumed = false;
+
+      if (state.progress.currentIndex >= state.routine.tasks.length) {
+        state.progress.completed = true;
+        state.progress.completedAt = new Date().toISOString();
+      }
+
+      saveProgress();
+      if (navigator.vibrate) navigator.vibrate(25);
+      renderTask();
+    }
+
+    function resetProgress() {
+      if (!state.progress) return;
+      state.progress.currentIndex = 0;
+      state.progress.completed = false;
+      state.progress.completedAt = null;
+      state.progress.lastUpdatedAt = new Date().toISOString();
+      state.resumed = false;
+      saveProgress();
+      renderTask();
+    }
+
+    function init() {
+      updateClocks();
+      setInterval(updateClocks, 1000);
+
+      state.routine = loadRoutine();
+      if (!state.routine) {
+        showScreen('empty');
+        return;
+      }
+
+      state.progress = loadProgress(state.routine);
+      renderTask();
+    }
+
+    els.doneButton.addEventListener('click', completeCurrentTask);
+    els.restartButton.addEventListener('click', resetProgress);
+
+    init();
+  </script>
+</body>
+</html>
