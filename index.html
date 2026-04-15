@@ -14,8 +14,6 @@
       --card: rgba(17, 17, 17, 0.96);
       --text: #f9fafb;
       --muted: #a1a1aa;
-      --accent: #22c55e;
-      --accentText: #052e16;
       --shadow: 0 18px 42px rgba(0,0,0,0.5);
       --radius: 28px;
     }
@@ -58,7 +56,7 @@
     }
 
     .card {
-      background: var(--card);
+      background: rgba(17, 17, 17, 0.96);
       border: 1px solid rgba(255,255,255,0.06);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -69,15 +67,12 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 6px;
+      min-height: 8px;
     }
 
     .clock {
-      font-variant-numeric: tabular-nums;
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--text);
-      white-space: nowrap;
+      display: none;
     }
 
     .task-panel {
@@ -133,8 +128,8 @@
       width: 100%;
       border: 0;
       border-radius: 18px;
-      padding: 18px 18px;
-      font-size: 24px;
+      padding: 20px 18px;
+      font-size: 30px;
       line-height: 1.2;
       font-weight: 800;
       cursor: pointer;
@@ -148,7 +143,7 @@
     .btn-primary {
       background: linear-gradient(90deg, #e8b3b3 0%, #ead9a8 18%, #d5e6b2 38%, #a7d8c2 55%, #a7dfea 74%, #c6b7de 100%);
       color: #1f2937;
-      min-height: 76px;
+      min-height: 86px;
     }
 
     .title {
@@ -165,6 +160,7 @@
       font-size: 15px;
       line-height: 1.7;
       text-align: center;
+      min-height: 0;
     }
 
     .empty-list {
@@ -228,8 +224,8 @@
           <div class="clock" id="doneClock"></div>
         </div>
         <div class="done-mark">✅</div>
-        <h1 class="title">すべて完了しました</h1>
-        <p class="subtitle" id="doneMessage">おつかれさまでした。</p>
+        <h1 class="title">Complieted</h1>
+        <p class="subtitle" id="doneMessage"></p>
         <div class="done-time" id="doneTime"></div>
         <div class="actions" style="margin-top:20px;">
           <button id="restartButton" class="btn-primary">もう一度ひらく</button>
@@ -268,8 +264,7 @@
 
     const state = {
       routine: null,
-      progress: null,
-      resumed: false
+      progress: null
     };
 
     const els = {
@@ -371,29 +366,29 @@
       try {
         const raw = localStorage.getItem(progressStorageKey(routine.routineId));
         if (!raw) {
-          state.resumed = false;
           return {
             currentIndex: 0,
             completed: false,
             completedAt: null,
+            startedAt: new Date().toISOString(),
             lastUpdatedAt: null
           };
         }
         const parsed = JSON.parse(raw);
-        state.resumed = (parsed.currentIndex || 0) > 0 && !parsed.completed;
         return {
           currentIndex: Number.isInteger(parsed.currentIndex) ? parsed.currentIndex : 0,
           completed: Boolean(parsed.completed),
           completedAt: parsed.completedAt || null,
+          startedAt: parsed.startedAt || new Date().toISOString(),
           lastUpdatedAt: parsed.lastUpdatedAt || null
         };
       } catch (error) {
         console.error('進捗読み込み失敗', error);
-        state.resumed = false;
         return {
           currentIndex: 0,
           completed: false,
           completedAt: null,
+          startedAt: new Date().toISOString(),
           lastUpdatedAt: null
         };
       }
@@ -424,12 +419,36 @@
       showScreen('task');
     }
 
+    function formatDuration(startIso, endIso) {
+      if (!startIso || !endIso) return '';
+      const diffMs = new Date(endIso) - new Date(startIso);
+      if (Number.isNaN(diffMs) || diffMs < 0) return '';
+
+      const totalMinutes = Math.floor(diffMs / 60000);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      if (hours > 0) {
+        return `${hours}時間${minutes}分`;
+      }
+      return `${minutes}分`;
+    }
+
     function renderDone() {
       const finishedAt = state.progress.completedAt
         ? new Date(state.progress.completedAt)
         : new Date();
-      els.doneMessage.textContent = 'おつかれさまでした。';
-      els.doneTime.textContent = `完了時刻: ${finishedAt.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`;
+
+      const duration = formatDuration(
+        state.progress.startedAt,
+        state.progress.completedAt || finishedAt.toISOString()
+      );
+
+      els.doneMessage.textContent = '';
+      els.doneTime.textContent = duration
+        ? `集中した時間: ${duration}`
+        : '集中した時間: -';
+
       showScreen('done');
     }
 
@@ -438,7 +457,6 @@
 
       state.progress.currentIndex += 1;
       state.progress.lastUpdatedAt = new Date().toISOString();
-      state.resumed = false;
 
       if (state.progress.currentIndex >= state.routine.tasks.length) {
         state.progress.completed = true;
@@ -455,8 +473,8 @@
       state.progress.currentIndex = 0;
       state.progress.completed = false;
       state.progress.completedAt = null;
+      state.progress.startedAt = new Date().toISOString();
       state.progress.lastUpdatedAt = new Date().toISOString();
-      state.resumed = false;
       saveProgress();
       renderTask();
     }
