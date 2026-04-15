@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ルーチン設定</title>
+  <style>
+    :root {
+      --bg: #0b0b0f;
+      --panel: #151821;
+      --panel-2: #10131a;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 18px 42px rgba(0,0,0,0.35);
+      --radius: 22px;
+      --grad: linear-gradient(90deg, #e8b3b3 0%, #ead9a8 18%, #d5e6b2 38%, #a7d8c2 55%, #a7dfea 74%, #c6b7de 100%);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .title {
+      margin: 0 0 8px;
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+      body { padding: 14px; }
+    }
+
+    label {
+      display: block;
+      margin: 18px 0 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 14px 16px;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    textarea {
+      min-height: 240px;
+      resize: vertical;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 180px;
+      gap: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .row { grid-template-columns: 1fr; }
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+    }
+
+    button:active { transform: scale(0.985); }
+
+    .primary {
+      background: var(--grad);
+      color: #1f2937;
+    }
+
+    .secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .output {
+      background: #0a0d12;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 180px;
+      overflow: auto;
+      font-size: 13px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .preview-box {
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 18px;
+      min-height: 520px;
+      position: sticky;
+      top: 24px;
+    }
+
+    .phone-screen {
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px 18px;
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1.35;
+      margin-top: 18px;
+      word-break: break-word;
+    }
+
+    .mini-bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      margin-top: 18px;
+    }
+
+    .mini-bar > div {
+      width: 25%;
+      height: 100%;
+      background: var(--grad);
+      border-radius: 999px;
+    }
+
+    .mini-button {
+      margin-top: 18px;
+      width: 100%;
+      border-radius: 18px;
+      padding: 18px;
+      font-size: 28px;
+      font-weight: 800;
+      background: var(--grad);
+      color: #1f2937;
+      text-align: center;
+    }
+
+    .help {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+      margin-top: 10px;
+    }
+
+    .ok {
+      color: #d5e6b2;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <h1 class="title">ルーチン設定</h1>
+      <p class="subtitle">パソコン側で内容を決めて、スマホ側の実行画面へ渡すための設定ページです。スマホでは考えず、ここでだけ順番を決める前提です。</p>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <div class="row">
+          <div>
+            <label for="routineName">ルーチン名</label>
+            <input id="routineName" type="text" value="夜の支度" />
+          </div>
+          <div>
+            <label for="routineId">routineId</label>
+            <input id="routineId" type="text" value="demo-evening" />
+          </div>
+        </div>
+
+        <label for="taskInput">タスク一覧（1行につき1件）</label>
+        <textarea id="taskInput">薬を飲む
+連絡帳を確認する
+明日の持ち物を確認する
+アラームをセットする</textarea>
+
+        <div class="actions">
+          <button class="primary" id="buildBtn">スマホ用データを作る</button>
+          <button class="secondary" id="copyJsonBtn">JSONをコピー</button>
+          <button class="secondary" id="copyUrlBtn">run.html用URLをコピー</button>
+          <button class="secondary" id="saveLocalBtn">この設定を保存</button>
+        </div>
+
+        <p class="help">URLコピーは、同じ公開場所に <span class="ok">run.html</span> がある前提です。GitHub Pagesに置くなら、後で <span class="ok">run.html?data=...</span> 形式で使えます。</p>
+
+        <label for="jsonOutput">スマホへ渡すJSON</label>
+        <div id="jsonOutput" class="output"></div>
+
+        <label for="urlBase">run.html のURLベース</label>
+        <input id="urlBase" type="text" placeholder="例: https://granaltlr-sudo.github.io/routine-app/run.html" />
+
+        <label for="urlOutput">生成したURL</label>
+        <div id="urlOutput" class="output"></div>
+      </div>
+
+      <div class="card preview-box">
+        <div class="subtitle">スマホ表示プレビュー</div>
+        <div id="previewTask" class="phone-screen">薬を飲む</div>
+        <div class="mini-bar"><div></div></div>
+        <div class="mini-button">できた</div>
+        <div class="help">ここでは1件目だけを確認します。実行中はスマホ側で1件ずつ進みます。</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'routine-admin-config-v1';
+
+    const els = {
+      routineName: document.getElementById('routineName'),
+      routineId: document.getElementById('routineId'),
+      taskInput: document.getElementById('taskInput'),
+      buildBtn: document.getElementById('buildBtn'),
+      copyJsonBtn: document.getElementById('copyJsonBtn'),
+      copyUrlBtn: document.getElementById('copyUrlBtn'),
+      saveLocalBtn: document.getElementById('saveLocalBtn'),
+      jsonOutput: document.getElementById('jsonOutput'),
+      urlBase: document.getElementById('urlBase'),
+      urlOutput: document.getElementById('urlOutput'),
+      previewTask: document.getElementById('previewTask')
+    };
+
+    function getTasks() {
+      return els.taskInput.value
+        .split('\n')
+        .map(v => v.trim())
+        .filter(Boolean);
+    }
+
+    function buildRoutineData() {
+      const routineName = els.routineName.value.trim() || 'ルーチン';
+      const routineId = els.routineId.value.trim() || `routine-${Date.now()}`;
+      const tasks = getTasks();
+
+      return {
+        routineId,
+        routineName,
+        tasks
+      };
+    }
+
+    function renderOutputs() {
+      const data = buildRoutineData();
+      els.previewTask.textContent = data.tasks[0] || 'タスクを入れてください';
+      els.jsonOutput.textContent = JSON.stringify(data, null, 2);
+
+      const base = els.urlBase.value.trim();
+      if (base && data.tasks.length > 0) {
+        const encoded = encodeURIComponent(JSON.stringify(data));
+        const sep = base.includes('?') ? '&' : '?';
+        els.urlOutput.textContent = `${base}${sep}data=${encoded}`;
+      } else {
+        els.urlOutput.textContent = '';
+      }
+    }
+
+    async function copyText(text) {
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('コピーしました。');
+      } catch (error) {
+        alert('コピーに失敗しました。手動で選択してください。');
+      }
+    }
+
+    function saveLocal() {
+      const payload = {
+        routineName: els.routineName.value,
+        routineId: els.routineId.value,
+        taskInput: els.taskInput.value,
+        urlBase: els.urlBase.value
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      alert('このパソコンのブラウザに保存しました。');
+    }
+
+    function loadLocal() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        els.routineName.value = saved.routineName || els.routineName.value;
+        els.routineId.value = saved.routineId || els.routineId.value;
+        els.taskInput.value = saved.taskInput || els.taskInput.value;
+        els.urlBase.value = saved.urlBase || '';
+      } catch (error) {
+        console.error('保存データ読み込み失敗', error);
+      }
+    }
+
+    els.buildBtn.addEventListener('click', renderOutputs);
+    els.copyJsonBtn.addEventListener('click', () => copyText(els.jsonOutput.textContent));
+    els.copyUrlBtn.addEventListener('click', () => copyText(els.urlOutput.textContent));
+    els.saveLocalBtn.addEventListener('click', saveLocal);
+
+    els.routineName.addEventListener('input', renderOutputs);
+    els.routineId.addEventListener('input', renderOutputs);
+    els.taskInput.addEventListener('input', renderOutputs);
+    els.urlBase.addEventListener('input', renderOutputs);
+
+    loadLocal();
+    renderOutputs();
+  </script>
+</body>
+</html>
