@@ -1,17 +1,4 @@
 <!DOCTYPE html>
-    const setupScreen = document.getElementById('setupScreen');
-    const timerScreen = document.getElementById('timerScreen');
-    const fill = document.getElementById('fill');
-    const timeLabel = document.getElementById('timeLabel');
-    const startBtn = document.getElementById('startBtn');
-    const customMinutes = document.getElementById('customMinutes');
-    const presetButtons = Array.from(document.querySelectorAll('.preset'));
-
-    let selectedMinutes = 1;
-    let totalMs = 60000;
-    let startTime = null;
-    let rafId = null;
-    let finished = false;
 
     function selectPreset(minutes) {
       selectedMinutes = minutes;
