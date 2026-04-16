@@ -1,502 +1,86 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="実行" />
-  <title>ルーチン実行</title>
-  <style>
-    :root {
-      --bg1: #000000;
-      --bg2: #000000;
-      --card: rgba(17, 17, 17, 0.96);
-      --text: #f9fafb;
-      --muted: #a1a1aa;
-      --shadow: 0 18px 42px rgba(0,0,0,0.5);
-      --radius: 28px;
+      margin: 8px 0 10px;
+      font-size: 30px;
     }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      background: #000;
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;
-      overscroll-behavior: none;
+    .sub {
+      margin: 0 0 24px;
+      color: #b6b6c2;
+      line-height: 1.6;
     }
-
-    body {
-      min-height: 100dvh;
+    .grid {
+      display: grid;
+      gap: 14px;
     }
-
-    .app {
-      min-height: 100dvh;
-      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
-      display: flex;
-      align-items: stretch;
-      background: #000;
-    }
-
-    .screen {
-      display: none;
-      width: 100%;
-      max-width: 720px;
-      margin: 0 auto;
-      align-self: center;
-    }
-
-    .screen.active {
-      display: block;
-    }
-
     .card {
-      background: rgba(17, 17, 17, 0.96);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      margin-bottom: 6px;
-      min-height: 8px;
-    }
-
-    .clock {
-      display: none;
-    }
-
-    .task-panel {
-      min-height: 50dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      display: block;
+      text-decoration: none;
+      color: #fff;
+      background: #17171d;
+      border: 1px solid #2b2b35;
       border-radius: 24px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      padding: 24px 18px;
-      margin: 8px 0 18px;
+      padding: 20px;
     }
-
-    .task-text {
-      font-size: clamp(38px, 9vw, 58px);
-      line-height: 1.35;
-      font-weight: 800;
-      letter-spacing: 0.01em;
-      word-break: break-word;
+    .card:active {
+      transform: scale(0.995);
     }
-
-    .meta {
-      text-align: center;
-      margin-bottom: 18px;
-    }
-
-    .progressbar {
-      width: 100%;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.08);
-      overflow: hidden;
-      margin-top: 12px;
-    }
-
-    .progressbar-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #e8b3b3 0%, #ead9a8 18%, #d5e6b2 38%, #a7d8c2 55%, #a7dfea 74%, #c6b7de 100%);
-      transition: width 0.22s ease;
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    button {
-      width: 100%;
-      border: 0;
-      border-radius: 18px;
-      padding: 20px 18px;
-      font-size: 30px;
-      line-height: 1.2;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.08s ease, opacity 0.15s ease;
-    }
-
-    button:active {
-      transform: scale(0.985);
-    }
-
-    .btn-primary {
-      background: linear-gradient(90deg, #e8b3b3 0%, #ead9a8 18%, #d5e6b2 38%, #a7d8c2 55%, #a7dfea 74%, #c6b7de 100%);
-      color: #1f2937;
-      min-height: 86px;
-    }
-
     .title {
-      margin: 8px 0 12px;
-      font-size: 30px;
-      line-height: 1.3;
+      font-size: 22px;
       font-weight: 800;
-      text-align: center;
+      margin-bottom: 8px;
     }
-
-    .subtitle {
-      margin: 0 0 18px;
-      color: var(--muted);
+    .desc {
+      color: #c3c3cc;
+      line-height: 1.6;
       font-size: 15px;
-      line-height: 1.7;
-      text-align: center;
-      min-height: 0;
     }
-
-    .empty-list {
-      display: grid;
-      gap: 10px;
+    .tag {
+      display: inline-block;
       margin-top: 12px;
-      text-align: left;
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.7;
-    }
-
-    .done-mark {
-      font-size: 64px;
-      text-align: center;
-      margin: 2px 0 10px;
-    }
-
-    .done-time {
-      text-align: center;
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 15px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #262632;
+      color: #d8d8e3;
+      font-size: 12px;
       font-weight: 700;
-    }
-
-    @media (min-width: 768px) {
-      .card {
-        padding: 28px;
-      }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <section id="taskScreen" class="screen active">
-      <div class="card">
-        <div class="topbar">
-          <div class="clock" id="taskClock"></div>
-        </div>
+  <div class="wrap">
+    <h1>ルーチン & タイマー</h1>
+    <p class="sub">ここを入口にして、朝・夜・砂時計などをまとめて使う。</p>
 
-        <div class="task-panel">
-          <div class="task-text" id="taskText">読み込み中...</div>
-        </div>
+    <div class="grid">
+      <a class="card" href="run.html?routine=morning">
+        <div class="title">朝ルーチン</div>
+        <div class="desc">morning.json を読み込んで、1タスクずつ全画面表示します。</div>
+        <div class="tag">run.html?routine=morning</div>
+      </a>
 
-        <div class="meta">
-          <div class="progressbar" aria-hidden="true">
-            <div class="progressbar-fill" id="progressFill"></div>
-          </div>
-        </div>
+      <a class="card" href="run.html?routine=evening">
+        <div class="title">夜ルーチン</div>
+        <div class="desc">evening.json を読み込んで、同じ仕組みで実行します。</div>
+        <div class="tag">run.html?routine=evening</div>
+      </a>
 
-        <div class="actions">
-          <button id="doneButton" class="btn-primary">できた</button>
-        </div>
-      </div>
-    </section>
+      <a class="card" href="admin.html?routine=morning">
+        <div class="title">朝ルーチン編集</div>
+        <div class="desc">JSONを表示してコピペ編集できる管理画面です。GitHubに戻して保存します。</div>
+        <div class="tag">admin.html?routine=morning</div>
+      </a>
 
-    <section id="doneScreen" class="screen">
-      <div class="card">
-        <div class="topbar">
-          <div class="clock" id="doneClock"></div>
-        </div>
-        <div class="done-mark">✅</div>
-        <h1 class="title">Complieted</h1>
-        <p class="subtitle" id="doneMessage"></p>
-        <div class="done-time" id="doneTime"></div>
-        <div class="actions" style="margin-top:20px;">
-          <button id="restartButton" class="btn-primary">もう一度ひらく</button>
-        </div>
-      </div>
-    </section>
+      <a class="card" href="admin.html?routine=evening">
+        <div class="title">夜ルーチン編集</div>
+        <div class="desc">夜用JSONを確認・編集するための入口です。</div>
+        <div class="tag">admin.html?routine=evening</div>
+      </a>
 
-    <section id="emptyScreen" class="screen">
-      <div class="card">
-        <div class="topbar">
-          <div class="clock" id="emptyClock"></div>
-        </div>
-        <h1 class="title">ルーチン設定がありません</h1>
-        <p class="subtitle">この画面はスマホ用の実行画面です。まずはパソコン側でルーチンを作り、設定データをこのページに渡してください。</p>
-        <div class="empty-list">
-          <div>必要な設定データの例:</div>
-          <div>・routineId</div>
-          <div>・routineName</div>
-          <div>・tasks（配列）</div>
-        </div>
-      </div>
-    </section>
+      <a class="card" href="hourglass.html">
+        <div class="title">砂時計タイマー</div>
+        <div class="desc">指定時間で下からピンクが上がり切り、時間切れ後に点滅します。</div>
+        <div class="tag">hourglass.html</div>
+      </a>
+    </div>
   </div>
-
-  <script>
-    const DEFAULT_ROUTINE = {
-      routineId: 'demo-evening',
-      routineName: '夜の支度',
-      tasks: [
-        '薬を飲む',
-        '連絡帳を確認する',
-        '明日の持ち物を確認する',
-        'アラームをセットする'
-      ]
-    };
-
-    const state = {
-      routine: null,
-      progress: null
-    };
-
-    const els = {
-      taskScreen: document.getElementById('taskScreen'),
-      doneScreen: document.getElementById('doneScreen'),
-      emptyScreen: document.getElementById('emptyScreen'),
-      taskText: document.getElementById('taskText'),
-      progressFill: document.getElementById('progressFill'),
-      doneButton: document.getElementById('doneButton'),
-      restartButton: document.getElementById('restartButton'),
-      taskClock: document.getElementById('taskClock'),
-      doneClock: document.getElementById('doneClock'),
-      emptyClock: document.getElementById('emptyClock'),
-      doneMessage: document.getElementById('doneMessage'),
-      doneTime: document.getElementById('doneTime')
-    };
-
-    function todayKey() {
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth() + 1).padStart(2, '0');
-      const d = String(now.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
-
-    function progressStorageKey(routineId) {
-      return `routine-progress:${routineId}:${todayKey()}`;
-    }
-
-    function nowText() {
-      return new Date().toLocaleTimeString('ja-JP', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
-    function updateClocks() {
-      const t = nowText();
-      els.taskClock.textContent = t;
-      els.doneClock.textContent = t;
-      els.emptyClock.textContent = t;
-    }
-
-    function showScreen(name) {
-      els.taskScreen.classList.remove('active');
-      els.doneScreen.classList.remove('active');
-      els.emptyScreen.classList.remove('active');
-
-      if (name === 'task') els.taskScreen.classList.add('active');
-      if (name === 'done') els.doneScreen.classList.add('active');
-      if (name === 'empty') els.emptyScreen.classList.add('active');
-    }
-
-    function parseRoutineFromQuery() {
-      const params = new URLSearchParams(window.location.search);
-      const encoded = params.get('data');
-      if (!encoded) return null;
-
-      try {
-        const json = decodeURIComponent(encoded);
-        const parsed = JSON.parse(json);
-        if (!parsed || !Array.isArray(parsed.tasks) || parsed.tasks.length === 0) {
-          return null;
-        }
-        return {
-          routineId: parsed.routineId || 'routine-' + Date.now(),
-          routineName: parsed.routineName || 'ルーチン',
-          tasks: parsed.tasks.filter(Boolean)
-        };
-      } catch (error) {
-        console.error('設定データ読み込み失敗', error);
-        return null;
-      }
-    }
-
-    function loadRoutine() {
-      const queryRoutine = parseRoutineFromQuery();
-      if (queryRoutine) {
-        localStorage.setItem('routine-last-config', JSON.stringify(queryRoutine));
-        return queryRoutine;
-      }
-
-      try {
-        const saved = localStorage.getItem('routine-last-config');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed && Array.isArray(parsed.tasks) && parsed.tasks.length > 0) {
-            return parsed;
-          }
-        }
-      } catch (error) {
-        console.error('保存済み設定読み込み失敗', error);
-      }
-
-      return DEFAULT_ROUTINE;
-    }
-
-    function loadProgress(routine) {
-      try {
-        const raw = localStorage.getItem(progressStorageKey(routine.routineId));
-        if (!raw) {
-          return {
-            currentIndex: 0,
-            completed: false,
-            completedAt: null,
-            startedAt: new Date().toISOString(),
-            lastUpdatedAt: null
-          };
-        }
-        const parsed = JSON.parse(raw);
-        return {
-          currentIndex: Number.isInteger(parsed.currentIndex) ? parsed.currentIndex : 0,
-          completed: Boolean(parsed.completed),
-          completedAt: parsed.completedAt || null,
-          startedAt: parsed.startedAt || new Date().toISOString(),
-          lastUpdatedAt: parsed.lastUpdatedAt || null
-        };
-      } catch (error) {
-        console.error('進捗読み込み失敗', error);
-        return {
-          currentIndex: 0,
-          completed: false,
-          completedAt: null,
-          startedAt: new Date().toISOString(),
-          lastUpdatedAt: null
-        };
-      }
-    }
-
-    function saveProgress() {
-      const key = progressStorageKey(state.routine.routineId);
-      localStorage.setItem(key, JSON.stringify(state.progress));
-    }
-
-    function renderTask() {
-      if (!state.routine || !Array.isArray(state.routine.tasks) || state.routine.tasks.length === 0) {
-        showScreen('empty');
-        return;
-      }
-
-      if (state.progress.completed || state.progress.currentIndex >= state.routine.tasks.length) {
-        renderDone();
-        return;
-      }
-
-      const currentTask = state.routine.tasks[state.progress.currentIndex];
-      const progressPercent = (state.progress.currentIndex / state.routine.tasks.length) * 100;
-
-      els.taskText.textContent = currentTask;
-      els.progressFill.style.width = `${progressPercent}%`;
-
-      showScreen('task');
-    }
-
-    function formatDuration(startIso, endIso) {
-      if (!startIso || !endIso) return '';
-      const diffMs = new Date(endIso) - new Date(startIso);
-      if (Number.isNaN(diffMs) || diffMs < 0) return '';
-
-      const totalMinutes = Math.floor(diffMs / 60000);
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-
-      if (hours > 0) {
-        return `${hours}時間${minutes}分`;
-      }
-      return `${minutes}分`;
-    }
-
-    function renderDone() {
-      const finishedAt = state.progress.completedAt
-        ? new Date(state.progress.completedAt)
-        : new Date();
-
-      const duration = formatDuration(
-        state.progress.startedAt,
-        state.progress.completedAt || finishedAt.toISOString()
-      );
-
-      els.doneMessage.textContent = '';
-      els.doneTime.textContent = duration
-        ? `集中した時間: ${duration}`
-        : '集中した時間: -';
-
-      showScreen('done');
-    }
-
-    function completeCurrentTask() {
-      if (!state.routine || !state.progress) return;
-
-      state.progress.currentIndex += 1;
-      state.progress.lastUpdatedAt = new Date().toISOString();
-
-      if (state.progress.currentIndex >= state.routine.tasks.length) {
-        state.progress.completed = true;
-        state.progress.completedAt = new Date().toISOString();
-      }
-
-      saveProgress();
-      if (navigator.vibrate) navigator.vibrate(25);
-      renderTask();
-    }
-
-    function resetProgress() {
-      if (!state.progress) return;
-      state.progress.currentIndex = 0;
-      state.progress.completed = false;
-      state.progress.completedAt = null;
-      state.progress.startedAt = new Date().toISOString();
-      state.progress.lastUpdatedAt = new Date().toISOString();
-      saveProgress();
-      renderTask();
-    }
-
-    function init() {
-      updateClocks();
-      setInterval(updateClocks, 1000);
-
-      state.routine = loadRoutine();
-      if (!state.routine) {
-        showScreen('empty');
-        return;
-      }
-
-      state.progress = loadProgress(state.routine);
-      renderTask();
-    }
-
-    els.doneButton.addEventListener('click', completeCurrentTask);
-    els.restartButton.addEventListener('click', resetProgress);
-
-    init();
-  </script>
 </body>
 </html>
