@@ -1,556 +1,99 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ルーチン設定</title>
-  <style>
-    :root {
-      --bg: #0b0b0f;
-      --panel: #151821;
-      --panel-2: #10131a;
-      --text: #f3f4f6;
-      --muted: #9ca3af;
-      --border: rgba(255,255,255,0.08);
-      --shadow: 0 18px 42px rgba(0,0,0,0.35);
-      --radius: 22px;
-      --grad: linear-gradient(90deg, #e8b3b3 0%, #ead9a8 18%, #d5e6b2 38%, #a7d8c2 55%, #a7dfea 74%, #c6b7de 100%);
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;
-    }
-
-    body {
-      min-height: 100vh;
-      padding: 24px;
-    }
-
-    .wrap {
-      max-width: 1080px;
-      margin: 0 auto;
-      display: grid;
-      gap: 20px;
-    }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 22px;
-    }
-
-    .title {
-      margin: 0 0 8px;
-      font-size: 30px;
-      font-weight: 800;
-      line-height: 1.25;
-    }
-
-    .subtitle {
-      margin: 0;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.7;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 20px;
-    }
-
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      body {
-        padding: 14px;
-      }
-    }
-
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 180px;
-      gap: 14px;
-    }
-
-    @media (max-width: 640px) {
-      .row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    label {
-      display: block;
-      margin: 18px 0 8px;
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    input, textarea {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: var(--panel-2);
-      color: var(--text);
-      padding: 14px 16px;
-      font-size: 16px;
-      line-height: 1.6;
-    }
-
-    textarea {
-      min-height: 180px;
-      resize: vertical;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    button {
-      border: 0;
-      border-radius: 16px;
-      padding: 14px 18px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.08s ease, opacity 0.15s ease;
-    }
-
-    button:active {
-      transform: scale(0.985);
-    }
-
-    .primary {
-      background: var(--grad);
-      color: #1f2937;
-    }
-
-    .secondary {
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .danger {
-      background: rgba(239,68,68,0.14);
-      color: #fecaca;
-      border: 1px solid rgba(239,68,68,0.28);
-    }
-
-    .help {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.7;
-      margin-top: 10px;
-    }
-
-    .output {
-      background: #0a0d12;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 14px;
-      min-height: 140px;
-      overflow: auto;
-      font-size: 13px;
-      line-height: 1.7;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .task-list {
-      background: #0a0d12;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 8px 14px;
-      min-height: 120px;
-    }
-
-    .task-row {
-      display: grid;
-      grid-template-columns: 1fr auto auto auto;
-      gap: 8px;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .task-row:last-child {
-      border-bottom: 0;
-    }
-
-    .task-label {
-      font-size: 16px;
-      line-height: 1.5;
-      word-break: break-word;
-      padding-right: 8px;
-    }
-
-    .mini-btn {
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      border-radius: 12px;
-      padding: 8px 12px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .mini-btn:disabled {
-      opacity: 0.35;
-      cursor: default;
-    }
-
-    .empty-state {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.7;
-      padding: 10px 0;
-    }
-
-    .preview-box {
-      background: #000;
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      padding: 18px;
-      min-height: 520px;
-      position: sticky;
-      top: 24px;
-    }
-
-    .phone-task {
-      border-radius: 24px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.02);
-      min-height: 380px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 24px 18px;
-      font-size: 34px;
-      font-weight: 800;
-      line-height: 1.35;
-      margin-top: 18px;
-      word-break: break-word;
-    }
-
-    .mini-bar {
-      width: 100%;
-      height: 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.08);
-      overflow: hidden;
-      margin-top: 18px;
-    }
-
-    .mini-bar > div {
-      width: 25%;
-      height: 100%;
-      background: var(--grad);
-      border-radius: 999px;
-    }
-
-    .mini-button {
-      margin-top: 18px;
-      width: 100%;
-      border-radius: 18px;
-      padding: 18px;
-      font-size: 28px;
-      font-weight: 800;
-      background: var(--grad);
-      color: #1f2937;
-      text-align: center;
-    }
-
-    .section-title {
-      margin-top: 18px;
-      margin-bottom: 8px;
-      font-size: 16px;
-      font-weight: 800;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <section class="card">
-      <h1 class="title">ルーチン設定</h1>
-      <p class="subtitle">パソコン側で、朝用・夕方用などのルーチンを作るためのページです。JSONは裏で自動生成されるので、普段はタスクを追加・並び替え・削除するだけで使えます。</p>
-    </section>
-
-    <section class="grid">
-      <div class="card">
-        <div class="row">
-          <div>
-            <label for="routineName">ルーチン名</label>
-            <input id="routineName" type="text" value="夜の支度" />
-          </div>
-          <div>
-            <label for="routineId">routineId</label>
-            <input id="routineId" type="text" value="evening" />
-          </div>
+        <div>
+          <label>ルーチン名</label>
+          <input id="titleInput" type="text" />
         </div>
-
-        <label for="newTaskInput">タスクを1件追加</label>
-        <div class="row">
-          <div>
-            <input id="newTaskInput" type="text" placeholder="例：薬を飲む" />
-          </div>
-          <div>
-            <button class="primary" id="addTaskBtn" type="button">追加</button>
-          </div>
+        <div>
+          <label>タスク一覧（1行に1個）</label>
+          <textarea id="tasksInput"></textarea>
         </div>
-
-        <div class="section-title">タスク一覧</div>
-        <div id="taskList" class="task-list"></div>
-
-        <p class="help">順番を変えたいときは ↑ ↓、いらないものは 削除 を押してください。</p>
-
-        <label for="taskInput">まとめ入力（1行につき1件）</label>
-        <textarea id="taskInput">薬を飲む
-連絡帳を確認する
-明日の持ち物を確認する
-アラームをセットする</textarea>
-
-        <p class="help">大量に貼り付けたいときだけ、ここを直接編集してください。上の一覧にもすぐ反映されます。</p>
-
-        <div class="actions">
-          <button class="primary" id="buildBtn" type="button">スマホ用データを作る</button>
-          <button class="secondary" id="copyJsonBtn" type="button">JSONをコピー</button>
-          <button class="secondary" id="copyUrlBtn" type="button">run用URLをコピー</button>
-          <button class="secondary" id="saveLocalBtn" type="button">この設定を保存</button>
-          <button class="danger" id="clearAllBtn" type="button">タスクを全消去</button>
-        </div>
-
-        <label for="urlBase">run.html のURLベース</label>
-        <input id="urlBase" type="text" placeholder="例：https://granaltlr-sudo.github.io/routine-app/" />
-
-        <label for="jsonOutput">自動生成されたJSON</label>
-        <div id="jsonOutput" class="output"></div>
-
-        <label for="urlOutput">生成したURL</label>
-        <div id="urlOutput" class="output"></div>
       </div>
-
-      <div class="card preview-box">
-        <div class="subtitle">スマホ表示プレビュー</div>
-        <div id="previewTask" class="phone-task">薬を飲む</div>
-        <div class="mini-bar"><div></div></div>
-        <div class="mini-button">できた</div>
-        <div class="help">スマホ側では1件ずつ表示されます。ここでは1件目だけを確認できます。</div>
+      <div class="btns">
+        <button id="buildBtn">JSONを作る</button>
+        <button id="copyBtn" class="secondary">JSONをコピー</button>
+        <a id="runLink" class="linkbtn secondary" href="#">このルーチンを実行</a>
       </div>
-    </section>
+    </div>
+
+    <div class="card">
+      <label>できあがったJSON</label>
+      <textarea id="jsonOutput"></textarea>
+      <div class="note">これを GitHub の <span id="fileName"></span> に丸ごと貼り付けてコミットすれば更新完了です。</div>
+    </div>
+
+    <div class="card">
+      <pre>
+GitHubでの更新手順
+1. リポジトリを開く
+2. routines フォルダを開く
+3. morning.json など該当ファイルを開く
+4. 鉛筆アイコン(Edit)を押す
+5. 中身を全部消して、この画面のJSONを貼る
+6. Commit changes を押す
+      </pre>
+    </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'routine-admin-config-v2';
+    const params = new URLSearchParams(location.search);
+    const routineName = params.get('routine') || 'morning';
 
-    const els = {
-      routineName: document.getElementById('routineName'),
-      routineId: document.getElementById('routineId'),
-      newTaskInput: document.getElementById('newTaskInput'),
-      addTaskBtn: document.getElementById('addTaskBtn'),
-      taskList: document.getElementById('taskList'),
-      taskInput: document.getElementById('taskInput'),
-      buildBtn: document.getElementById('buildBtn'),
-      copyJsonBtn: document.getElementById('copyJsonBtn'),
-      copyUrlBtn: document.getElementById('copyUrlBtn'),
-      saveLocalBtn: document.getElementById('saveLocalBtn'),
-      clearAllBtn: document.getElementById('clearAllBtn'),
-      urlBase: document.getElementById('urlBase'),
-      jsonOutput: document.getElementById('jsonOutput'),
-      urlOutput: document.getElementById('urlOutput'),
-      previewTask: document.getElementById('previewTask')
-    };
+    const titleInput = document.getElementById('titleInput');
+    const tasksInput = document.getElementById('tasksInput');
+    const jsonOutput = document.getElementById('jsonOutput');
+    const buildBtn = document.getElementById('buildBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const runLink = document.getElementById('runLink');
+    const fileName = document.getElementById('fileName');
 
-    function getTasks() {
-      return els.taskInput.value
-        .split('\n')
+    fileName.textContent = `routines/${routineName}.json`;
+    runLink.href = `run.html?routine=${encodeURIComponent(routineName)}`;
+
+    function buildJson() {
+      const title = titleInput.value.trim() || routineName;
+      const tasks = tasksInput.value
+        .split(/\n/)
         .map(v => v.trim())
         .filter(Boolean);
-    }
 
-    function setTasks(tasks) {
-      els.taskInput.value = tasks.join('\n');
-      renderTaskList();
-      renderOutputs();
-    }
-
-    function buildRoutineData() {
-      return {
-        routineId: els.routineId.value.trim() || `routine-${Date.now()}`,
-        routineName: els.routineName.value.trim() || 'ルーチン',
-        tasks: getTasks()
+      const output = {
+        title,
+        tasks
       };
+
+      jsonOutput.value = JSON.stringify(output, null, 2);
     }
 
-    function renderTaskList() {
-      const tasks = getTasks();
-      els.taskList.innerHTML = '';
+    buildBtn.addEventListener('click', buildJson);
 
-      if (tasks.length === 0) {
-        els.taskList.innerHTML = '<div class="empty-state">まだタスクがありません。上の入力欄に1件入れて「追加」を押してください。</div>';
-        return;
-      }
-
-      tasks.forEach((task, index) => {
-        const row = document.createElement('div');
-        row.className = 'task-row';
-
-        const label = document.createElement('div');
-        label.className = 'task-label';
-        label.textContent = `${index + 1}. ${task}`;
-
-        const upBtn = document.createElement('button');
-        upBtn.className = 'mini-btn';
-        upBtn.type = 'button';
-        upBtn.textContent = '↑';
-        upBtn.disabled = index === 0;
-        upBtn.addEventListener('click', () => moveTask(index, -1));
-
-        const downBtn = document.createElement('button');
-        downBtn.className = 'mini-btn';
-        downBtn.type = 'button';
-        downBtn.textContent = '↓';
-        downBtn.disabled = index === tasks.length - 1;
-        downBtn.addEventListener('click', () => moveTask(index, 1));
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'mini-btn';
-        deleteBtn.type = 'button';
-        deleteBtn.textContent = '削除';
-        deleteBtn.addEventListener('click', () => deleteTask(index));
-
-        row.appendChild(label);
-        row.appendChild(upBtn);
-        row.appendChild(downBtn);
-        row.appendChild(deleteBtn);
-        els.taskList.appendChild(row);
-      });
-    }
-
-    function renderOutputs() {
-      const data = buildRoutineData();
-      els.previewTask.textContent = data.tasks[0] || 'タスクを入れてください';
-      els.jsonOutput.textContent = JSON.stringify(data, null, 2);
-
-      const base = els.urlBase.value.trim();
-      if (base && data.tasks.length > 0) {
-        const encoded = encodeURIComponent(JSON.stringify(data));
-        const sep = base.includes('?') ? '&' : '?';
-        els.urlOutput.textContent = `${base}${sep}data=${encoded}`;
-      } else {
-        els.urlOutput.textContent = '';
-      }
-    }
-
-    function addTask() {
-      const value = els.newTaskInput.value.trim();
-      if (!value) return;
-
-      const tasks = getTasks();
-      tasks.push(value);
-      els.newTaskInput.value = '';
-      setTasks(tasks);
-      els.newTaskInput.focus();
-    }
-
-    function moveTask(index, delta) {
-      const tasks = getTasks();
-      const nextIndex = index + delta;
-      if (nextIndex < 0 || nextIndex >= tasks.length) return;
-
-      [tasks[index], tasks[nextIndex]] = [tasks[nextIndex], tasks[index]];
-      setTasks(tasks);
-    }
-
-    function deleteTask(index) {
-      const tasks = getTasks();
-      tasks.splice(index, 1);
-      setTasks(tasks);
-    }
-
-    async function copyText(text) {
-      if (!text) return;
+    copyBtn.addEventListener('click', async () => {
       try {
-        await navigator.clipboard.writeText(text);
-        alert('コピーしました。');
-      } catch (error) {
-        alert('コピーに失敗しました。手動で選択してください。');
-      }
-    }
-
-    function saveLocal() {
-      const payload = {
-        routineName: els.routineName.value,
-        routineId: els.routineId.value,
-        taskInput: els.taskInput.value,
-        urlBase: els.urlBase.value
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      alert('このパソコンのブラウザに保存しました。');
-    }
-
-    function loadLocal() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-
-        const saved = JSON.parse(raw);
-        els.routineName.value = saved.routineName || els.routineName.value;
-        els.routineId.value = saved.routineId || els.routineId.value;
-        els.taskInput.value = saved.taskInput || els.taskInput.value;
-        els.urlBase.value = saved.urlBase || '';
-      } catch (error) {
-        console.error('保存データ読み込み失敗', error);
-      }
-    }
-
-    function clearAllTasks() {
-      if (!confirm('タスクを全部消しますか？')) return;
-      setTasks([]);
-    }
-
-    els.addTaskBtn.addEventListener('click', addTask);
-    els.buildBtn.addEventListener('click', renderOutputs);
-    els.copyJsonBtn.addEventListener('click', () => copyText(els.jsonOutput.textContent));
-    els.copyUrlBtn.addEventListener('click', () => copyText(els.urlOutput.textContent));
-    els.saveLocalBtn.addEventListener('click', saveLocal);
-    els.clearAllBtn.addEventListener('click', clearAllTasks);
-
-    els.newTaskInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        addTask();
+        await navigator.clipboard.writeText(jsonOutput.value);
+        copyBtn.textContent = 'コピーしました';
+        setTimeout(() => {
+          copyBtn.textContent = 'JSONをコピー';
+        }, 1200);
+      } catch {
+        copyBtn.textContent = 'コピー失敗';
       }
     });
 
-    els.routineName.addEventListener('input', renderOutputs);
-    els.routineId.addEventListener('input', renderOutputs);
-    els.urlBase.addEventListener('input', renderOutputs);
+    async function init() {
+      try {
+        const response = await fetch(`routines/${routineName}.json?ts=${Date.now()}`);
+        if (!response.ok) throw new Error('not found');
+        const data = await response.json();
+        titleInput.value = data.title || routineName;
+        tasksInput.value = Array.isArray(data.tasks) ? data.tasks.join('\n') : '';
+        buildJson();
+      } catch {
+        titleInput.value = routineName;
+        tasksInput.value = '';
+        buildJson();
+      }
+    }
 
-    els.taskInput.addEventListener('input', () => {
-      renderTaskList();
-      renderOutputs();
-    });
-
-    loadLocal();
-    renderTaskList();
-    renderOutputs();
+    init();
   </script>
 </body>
 </html>
