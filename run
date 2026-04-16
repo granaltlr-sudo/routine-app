@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+      font-size: 15px;
+      text-align: center;
+      line-height: 1.6;
+    }
+    .error {
+      font-size: 20px;
+      line-height: 1.7;
+      text-align: center;
+      color: #ffd3e7;
+      max-width: 92vw;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <div id="topLabel" class="top"></div>
+    <div id="taskText" class="task">読み込み中...</div>
+    <div class="progress"><div id="bar" class="bar"></div></div>
+    <button id="doneBtn" class="btn">できた</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const routineName = params.get('routine') || 'morning';
+
+    const topLabel = document.getElementById('topLabel');
+    const taskText = document.getElementById('taskText');
+    const bar = document.getElementById('bar');
+    const doneBtn = document.getElementById('doneBtn');
+
+    let routine = null;
+    let currentIndex = 0;
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function updateView() {
+      const tasks = routine.tasks || [];
+      const total = tasks.length;
+
+      if (currentIndex >= total) {
+        topLabel.textContent = routine.title || 'Routine';
+        taskText.innerHTML = `<div class="done">Completed</div><div class="sub">おつかれさま。<br>もう一度最初からやるには画面を再読み込みしてください。</div>`;
+        bar.style.width = '100%';
+        doneBtn.style.display = 'none';
+        return;
+      }
+
+      const task = tasks[currentIndex];
+      topLabel.textContent = `${routine.title || 'Routine'}  ${currentIndex + 1}/${total}`;
+      taskText.textContent = task;
+      bar.style.width = `${(currentIndex / total) * 100}%`;
+      doneBtn.style.display = 'block';
+    }
+
+    doneBtn.addEventListener('click', () => {
+      currentIndex += 1;
+      updateView();
+    });
+
+    async function init() {
+      try {
+        const response = await fetch(`routines/${routineName}.json?ts=${Date.now()}`);
+        if (!response.ok) {
+          throw new Error(`routines/${routineName}.json が見つかりません`);
+        }
+        routine = await response.json();
+        if (!Array.isArray(routine.tasks)) {
+          throw new Error('JSONの tasks が配列になっていません');
+        }
+        updateView();
+      } catch (error) {
+        topLabel.textContent = '読み込みエラー';
+        taskText.innerHTML = `<div class="error">${escapeHtml(error.message)}\n\nURL例: run.html?routine=morning</div>`;
+        bar.style.width = '0%';
+        doneBtn.style.display = 'none';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
