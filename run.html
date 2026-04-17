@@ -1,8 +1,121 @@
 <!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Routine Runner</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+    }
+
+    body {
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding:
+        max(20px, env(safe-area-inset-top))
+        20px
+        max(26px, env(safe-area-inset-bottom));
+      background: #000;
+    }
+
+    .top {
+      position: absolute;
+      top: max(18px, env(safe-area-inset-top));
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #8d8d96;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .task {
+      font-size: clamp(28px, 7vw, 52px);
+      line-height: 1.35;
+      text-align: center;
+      font-weight: 800;
+      max-width: 92vw;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .progress {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: calc(env(safe-area-inset-bottom) + 110px);
+      height: 12px;
+      border-radius: 999px;
+      background: #1f1f26;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: #ff6fb5;
+      transition: width 0.2s ease;
+    }
+
+    .btn {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: calc(env(safe-area-inset-bottom) + 24px);
+      border: none;
+      border-radius: 24px;
+      padding: 20px 24px;
+      font-size: 28px;
+      font-weight: 900;
+      background: #ff6fb5;
+      color: #fff;
+      box-shadow: 0 14px 40px rgba(255, 111, 181, 0.28);
+      cursor: pointer;
+    }
+
+    .btn:active {
+      transform: scale(0.995);
+    }
+
+    .done {
+      font-size: clamp(30px, 8vw, 56px);
+      text-align: center;
+      font-weight: 900;
+      line-height: 1.4;
+    }
+
+    .sub {
+      margin-top: 14px;
+      color: #acacb8;
       font-size: 15px;
       text-align: center;
       line-height: 1.6;
+      white-space: pre-wrap;
     }
+
     .error {
       font-size: 20px;
       line-height: 1.7;
@@ -17,7 +130,11 @@
   <div class="screen">
     <div id="topLabel" class="top"></div>
     <div id="taskText" class="task">読み込み中...</div>
-    <div class="progress"><div id="bar" class="bar"></div></div>
+
+    <div class="progress">
+      <div id="bar" class="bar"></div>
+    </div>
+
     <button id="doneBtn" class="btn">できた</button>
   </div>
 
@@ -42,13 +159,29 @@
         .replaceAll("'", '&#39;');
     }
 
+    function showError(message) {
+      topLabel.textContent = '読み込みエラー';
+      taskText.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+      bar.style.width = '0%';
+      doneBtn.style.display = 'none';
+    }
+
     function updateView() {
       const tasks = routine.tasks || [];
       const total = tasks.length;
 
+      if (total === 0) {
+        showError('タスクが0件です。JSONの tasks に1件以上入れてください。');
+        return;
+      }
+
       if (currentIndex >= total) {
         topLabel.textContent = routine.title || 'Routine';
-        taskText.innerHTML = `<div class="done">Completed</div><div class="sub">おつかれさま。<br>もう一度最初からやるには画面を再読み込みしてください。</div>`;
+        taskText.innerHTML = `
+          <div class="done">Completed</div>
+          <div class="sub">おつかれさま。
+画面を再読み込みすると最初からもう一度できます。</div>
+        `;
         bar.style.width = '100%';
         doneBtn.style.display = 'none';
         return;
@@ -66,22 +199,54 @@
       updateView();
     });
 
+    async function loadRoutine() {
+      const candidatePaths = [
+        `ルーティン/${routineName}.json?ts=${Date.now()}`,
+        `routines/${routineName}.json?ts=${Date.now()}`
+      ];
+
+      let lastError = null;
+
+      for (const path of candidatePaths) {
+        try {
+          const response = await fetch(path);
+          if (!response.ok) {
+            throw new Error(`${path} が見つかりません`);
+          }
+
+          const data = await response.json();
+
+          if (!Array.isArray(data.tasks)) {
+            throw new Error(`${path} の tasks が配列ではありません`);
+          }
+
+          return data;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      throw lastError || new Error('ルーチンJSONの読み込みに失敗しました');
+    }
+
     async function init() {
       try {
-        const response = await fetch(`routines/${routineName}.json?ts=${Date.now()}`);
-        if (!response.ok) {
-          throw new Error(`routines/${routineName}.json が見つかりません`);
-        }
-        routine = await response.json();
-        if (!Array.isArray(routine.tasks)) {
-          throw new Error('JSONの tasks が配列になっていません');
-        }
+        routine = await loadRoutine();
+        currentIndex = 0;
         updateView();
       } catch (error) {
-        topLabel.textContent = '読み込みエラー';
-        taskText.innerHTML = `<div class="error">${escapeHtml(error.message)}\n\nURL例: run.html?routine=morning</div>`;
-        bar.style.width = '0%';
-        doneBtn.style.display = 'none';
+        showError(
+          `${error.message}
+
+開き方の例:
+run.html?routine=morning
+run.html?routine=evening
+
+確認ポイント:
+・フォルダ名が「ルーティン」または「routines」になっているか
+・その中に morning.json / evening.json があるか
+・JSONの形が正しいか`
+        );
       }
     }
 
