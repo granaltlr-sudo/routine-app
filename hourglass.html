@@ -6,15 +6,14 @@
     name="viewport"
     content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
   />
-  <title>Silent Dual Alarm Hourglass</title>
+  <title>Silent Dual Hourglass</title>
   <style>
     :root {
-      --bg: #000000;
-      --panel: #101010;
-      --panel2: #181818;
-      --text: #f3f3f3;
-      --muted: #aaaaaa;
-      --accent: #ff69b4;
+      --bg: #000;
+      --card: #111;
+      --card2: #171717;
+      --text: #f5f5f5;
+      --muted: #9a9a9a;
       --border: rgba(255,255,255,0.12);
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -22,7 +21,11 @@
       --safe-right: env(safe-area-inset-right, 0px);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     html, body {
       margin: 0;
       width: 100%;
@@ -39,55 +42,65 @@
     }
 
     .app {
+      position: relative;
       width: 100vw;
       height: 100vh;
       background: #000;
-      position: relative;
       overflow: hidden;
     }
 
-    /* ---------- setup screen ---------- */
+    /* ---------- setup ---------- */
     .setup-screen {
       position: absolute;
       inset: 0;
-      padding:
-        calc(16px + var(--safe-top))
-        calc(14px + var(--safe-right))
-        calc(16px + var(--safe-bottom))
-        calc(14px + var(--safe-left));
-      background:
-        radial-gradient(circle at top, rgba(255,255,255,0.06), transparent 32%),
-        #000;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      padding:
+        calc(14px + var(--safe-top))
+        calc(14px + var(--safe-right))
+        calc(14px + var(--safe-bottom))
+        calc(14px + var(--safe-left));
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.05), transparent 30%),
+        #000;
+      overflow: auto;
     }
 
-    .setup-header {
-      text-align: center;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      margin-top: 4px;
-    }
-
-    .top-options {
+    .topbar {
       display: flex;
       justify-content: center;
-      gap: 10px;
       align-items: center;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid var(--border);
-      border-radius: 16px;
+      min-height: 28px;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .master-toggle {
+      display: flex;
+      justify-content: center;
+      align-items: center;
       padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .master-toggle label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .setup-grid {
-      flex: 1;
-      min-height: 0;
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
+      flex: 1;
+      min-height: 0;
+      align-items: stretch;
     }
 
     .setup-grid.single {
@@ -95,37 +108,37 @@
     }
 
     .setup-card {
-      background: linear-gradient(180deg, var(--panel2), var(--panel));
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 14px;
+      min-width: 0;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       gap: 12px;
-      min-height: 0;
+      padding: 14px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border: 1px solid var(--border);
     }
 
-    .setup-card h2 {
-      margin: 0;
+    .card-title {
+      text-align: center;
       font-size: 18px;
-      line-height: 1.2;
+      font-weight: 700;
+      margin: 0;
     }
 
-    .sub {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
-      margin-top: -4px;
-    }
-
-    .field-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    .row {
+      display: flex;
       gap: 8px;
     }
 
-    .field-row.two {
-      grid-template-columns: repeat(2, 1fr);
+    .row.equal-2 > .field {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .row.equal-3 > .field {
+      flex: 1 1 0;
+      min-width: 0;
     }
 
     .field {
@@ -141,13 +154,14 @@
 
     input[type="number"],
     input[type="date"],
-    input[type="time"] {
+    input[type="time"],
+    select {
       width: 100%;
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
       background: #000;
       color: #fff;
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 14px;
-      height: 46px;
       font-size: 16px;
       padding: 0 12px;
       outline: none;
@@ -156,71 +170,50 @@
     input[type="color"] {
       width: 100%;
       height: 46px;
-      border: 1px solid rgba(255,255,255,0.16);
       border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
       background: #000;
       padding: 4px;
     }
 
-    .toggle-line {
+    .section {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.10);
-      font-size: 14px;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .section-title {
+      font-size: 13px;
+      color: #d5d5d5;
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     .hint {
-      font-size: 12px;
-      color: #ffb3c7;
       min-height: 16px;
+      font-size: 12px;
+      color: #ffb6c9;
     }
 
-    .btn-row {
-      display: flex;
-      gap: 8px;
-      margin-top: auto;
-    }
-
-    button {
-      appearance: none;
+    .start-btn {
+      min-height: 54px;
       border: none;
-      outline: none;
-      border-radius: 16px;
-      min-height: 48px;
-      padding: 0 16px;
-      font-size: 15px;
-      font-weight: 700;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #ffffff, #dddddd);
+      color: #000;
+      font-size: 16px;
+      font-weight: 800;
       cursor: pointer;
     }
 
-    .btn-primary {
-      flex: 1;
-      background: #fff;
-      color: #000;
-    }
-
-    .btn-secondary {
-      flex: 1;
-      background: rgba(255,255,255,0.10);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.12);
-    }
-
-    .global-start {
-      min-height: 54px;
-      background: linear-gradient(180deg, #ffffff, #dfdfdf);
-      color: #000;
-      font-size: 16px;
-      border-radius: 18px;
-      font-weight: 800;
-    }
-
-    /* ---------- timer screen ---------- */
+    /* ---------- timer ---------- */
     .timer-screen {
       position: absolute;
       inset: 0;
@@ -237,86 +230,39 @@
       grid-template-columns: 1fr;
     }
 
-    .mode-pane {
+    .pane {
       position: relative;
-      min-width: 0;
-      min-height: 0;
       overflow: hidden;
       background: #000;
-      border-right: 1px solid rgba(255,255,255,0.08);
     }
 
-    .mode-pane:last-child {
-      border-right: none;
+    .pane + .pane {
+      border-left: 1px solid rgba(255,255,255,0.08);
     }
 
-    .pane-base {
+    .base {
       position: absolute;
       inset: 0;
       background: #000;
     }
 
-    .pane-fill {
+    .fill {
       position: absolute;
       left: 0;
       right: 0;
       bottom: 0;
       height: 0%;
-      background: var(--accent);
-      will-change: height;
+      background: #ff69b4;
+      will-change: height, opacity;
     }
 
-    .pane-ui {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding:
-        calc(16px + var(--safe-top))
-        12px
-        calc(16px + var(--safe-bottom))
-        12px;
-      z-index: 2;
-      pointer-events: none;
+    .blink .fill {
+      animation: fillBlink 1s steps(2, start) infinite;
     }
 
-    .pane-top {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: center;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.35);
-    }
-
-    .pane-title {
-      font-size: 16px;
-      font-weight: 700;
-      opacity: 0.95;
-    }
-
-    .pane-status {
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    .pane-time {
-      text-align: center;
-      font-size: clamp(28px, 6vw, 54px);
-      line-height: 1;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.35);
-      margin-bottom: 8vh;
-    }
-
-    .finished-blink .pane-fill {
-      animation: blinkFill 1s steps(2, start) infinite;
-    }
-
-    @keyframes blinkFill {
-      0%   { opacity: 1; }
-      50%  { opacity: 0.25; }
+    @keyframes fillBlink {
+      0% { opacity: 1; }
+      50% { opacity: 0.25; }
       100% { opacity: 1; }
     }
 
@@ -324,25 +270,25 @@
       position: absolute;
       inset: 0;
       z-index: 5;
-      background: transparent;
       display: none;
+      background: transparent;
     }
 
     .tap-layer.active {
       display: block;
     }
 
-    .tap-message {
+    .tap-pill {
       position: absolute;
       left: 50%;
-      bottom: calc(24px + var(--safe-bottom));
+      bottom: calc(20px + var(--safe-bottom));
       transform: translateX(-50%);
       padding: 10px 14px;
       border-radius: 999px;
-      background: rgba(0,0,0,0.55);
-      color: #fff;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
+      color: #fff;
+      background: rgba(0,0,0,0.48);
       backdrop-filter: blur(6px);
       white-space: nowrap;
     }
@@ -352,200 +298,314 @@
       inset: 0;
       z-index: 6;
       display: none;
-      background: linear-gradient(180deg, #121212, #050505);
+      flex-direction: column;
+      gap: 12px;
       padding:
-        calc(16px + var(--safe-top))
+        calc(14px + var(--safe-top))
         12px
-        calc(16px + var(--safe-bottom))
+        calc(14px + var(--safe-bottom))
         12px;
+      background: linear-gradient(180deg, #131313, #050505);
       overflow: auto;
     }
 
     .inline-setup.active {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
     }
 
-    .inline-setup h3 {
+    .inline-title {
       margin: 0;
       text-align: center;
       font-size: 18px;
+      font-weight: 700;
     }
 
     .small-note {
+      margin-top: -4px;
       text-align: center;
       font-size: 12px;
       color: var(--muted);
-      margin-top: -4px;
     }
 
-    .hidden {
-      display: none !important;
+    .restart-btn {
+      min-height: 50px;
+      border: none;
+      border-radius: 16px;
+      background: #fff;
+      color: #000;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <!-- SETUP -->
+    <!-- ================= SETUP ================= -->
     <section id="setupScreen" class="setup-screen">
-      <div class="setup-header">無音デュアル砂時計</div>
+      <div class="topbar">無音砂時計</div>
 
-      <div class="top-options">
-        <label style="display:flex;align-items:center;gap:8px;font-size:14px;">
-          <input id="mode2Enabled" type="checkbox" checked />
-          モード2を使う
+      <div class="master-toggle">
+        <label>
+          <input id="rightEnabled" type="checkbox" checked />
+          右側も使う
         </label>
       </div>
 
       <div id="setupGrid" class="setup-grid">
-        <!-- MODE 1 -->
+        <!-- LEFT -->
         <div class="setup-card">
-          <h2>モード1</h2>
-          <div class="sub">相対時間（〇日〇時間〇分後）</div>
+          <h2 class="card-title">左</h2>
 
-          <div class="field-row">
+          <div class="section">
+            <div class="section-title">方式</div>
             <div class="field">
-              <label for="m1Days">日</label>
-              <input id="m1Days" type="number" min="0" max="365" value="0" />
-            </div>
-            <div class="field">
-              <label for="m1Hours">時間</label>
-              <input id="m1Hours" type="number" min="0" max="23" value="0" />
-            </div>
-            <div class="field">
-              <label for="m1Minutes">分</label>
-              <input id="m1Minutes" type="number" min="0" max="59" value="30" />
+              <label for="leftType">時間の決め方</label>
+              <select id="leftType">
+                <option value="relative">相対（〇日〇時間〇分後）</option>
+                <option value="absolute">絶対（日時指定）</option>
+              </select>
             </div>
           </div>
 
-          <div class="field">
-            <label for="m1Color">色</label>
-            <input id="m1Color" type="color" value="#ff69b4" />
+          <div id="leftRelativeSection" class="section">
+            <div class="section-title">相対</div>
+            <div class="row equal-3">
+              <div class="field">
+                <label for="leftDays">日</label>
+                <input id="leftDays" type="number" min="0" max="365" value="0" />
+              </div>
+              <div class="field">
+                <label for="leftHours">時間</label>
+                <input id="leftHours" type="number" min="0" max="23" value="0" />
+              </div>
+              <div class="field">
+                <label for="leftMinutes">分</label>
+                <input id="leftMinutes" type="number" min="0" max="59" value="30" />
+              </div>
+            </div>
           </div>
 
-          <div id="m1Hint" class="hint"></div>
+          <div id="leftAbsoluteSection" class="section hidden">
+            <div class="section-title">絶対</div>
+            <div class="row equal-2">
+              <div class="field">
+                <label for="leftDate">日付</label>
+                <input id="leftDate" type="date" />
+              </div>
+              <div class="field">
+                <label for="leftTime">時刻</label>
+                <input id="leftTime" type="time" step="60" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">色</div>
+            <div class="field">
+              <label for="leftColor">到達色</label>
+              <input id="leftColor" type="color" value="#ff69b4" />
+            </div>
+          </div>
+
+          <div id="leftHint" class="hint"></div>
         </div>
 
-        <!-- MODE 2 -->
-        <div id="mode2SetupCard" class="setup-card">
-          <h2>モード2</h2>
-          <div class="sub">絶対時刻（今日の特定時刻が初期値）</div>
+        <!-- RIGHT -->
+        <div id="rightCard" class="setup-card">
+          <h2 class="card-title">右</h2>
 
-          <div class="field-row two">
+          <div class="section">
+            <div class="section-title">方式</div>
             <div class="field">
-              <label for="m2Date">日付</label>
-              <input id="m2Date" type="date" />
-            </div>
-            <div class="field">
-              <label for="m2Time">時刻</label>
-              <input id="m2Time" type="time" step="60" />
+              <label for="rightType">時間の決め方</label>
+              <select id="rightType">
+                <option value="absolute">絶対（日時指定）</option>
+                <option value="relative">相対（〇日〇時間〇分後）</option>
+              </select>
             </div>
           </div>
 
-          <div class="field">
-            <label for="m2Color">色</label>
-            <input id="m2Color" type="color" value="#8debd7" />
+          <div id="rightRelativeSection" class="section hidden">
+            <div class="section-title">相対</div>
+            <div class="row equal-3">
+              <div class="field">
+                <label for="rightDays">日</label>
+                <input id="rightDays" type="number" min="0" max="365" value="0" />
+              </div>
+              <div class="field">
+                <label for="rightHours">時間</label>
+                <input id="rightHours" type="number" min="0" max="23" value="0" />
+              </div>
+              <div class="field">
+                <label for="rightMinutes">分</label>
+                <input id="rightMinutes" type="number" min="0" max="59" value="30" />
+              </div>
+            </div>
           </div>
 
-          <div id="m2Hint" class="hint"></div>
+          <div id="rightAbsoluteSection" class="section">
+            <div class="section-title">絶対</div>
+            <div class="row equal-2">
+              <div class="field">
+                <label for="rightDate">日付</label>
+                <input id="rightDate" type="date" />
+              </div>
+              <div class="field">
+                <label for="rightTime">時刻</label>
+                <input id="rightTime" type="time" step="60" />
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">色</div>
+            <div class="field">
+              <label for="rightColor">到達色</label>
+              <input id="rightColor" type="color" value="#8debd7" />
+            </div>
+          </div>
+
+          <div id="rightHint" class="hint"></div>
         </div>
       </div>
 
-      <button id="startAllBtn" class="global-start">スタート</button>
+      <button id="startBtn" class="start-btn">スタート</button>
     </section>
 
-    <!-- TIMER -->
+    <!-- ================= TIMER ================= -->
     <section id="timerScreen" class="timer-screen">
-      <!-- LEFT / MODE 1 -->
-      <div id="pane1" class="mode-pane">
-        <div class="pane-base"></div>
-        <div id="fill1" class="pane-fill"></div>
-        <div class="pane-ui">
-          <div class="pane-top">
-            <div class="pane-title">モード1</div>
-            <div id="status1" class="pane-status">待機中</div>
-          </div>
-          <div id="time1" class="pane-time">00:00</div>
-        </div>
-        <div id="tap1" class="tap-layer">
-          <div class="tap-message">タップしてこのモードだけ再設定</div>
+      <div id="paneLeft" class="pane">
+        <div class="base"></div>
+        <div id="fillLeft" class="fill"></div>
+        <div id="tapLeft" class="tap-layer">
+          <div class="tap-pill">タップして再設定</div>
         </div>
 
-        <!-- inline setup for mode1 -->
-        <div id="inlineSetup1" class="inline-setup">
-          <h3>モード1を再設定</h3>
-          <div class="small-note">もう片方は止まらず進み続けます</div>
+        <div id="inlineLeft" class="inline-setup">
+          <h3 class="inline-title">左を再設定</h3>
+          <div class="small-note">右は止まらず進み続けます</div>
 
-          <div class="field-row">
+          <div class="section">
+            <div class="section-title">方式</div>
             <div class="field">
-              <label for="m1DaysInline">日</label>
-              <input id="m1DaysInline" type="number" min="0" max="365" value="0" />
-            </div>
-            <div class="field">
-              <label for="m1HoursInline">時間</label>
-              <input id="m1HoursInline" type="number" min="0" max="23" value="0" />
-            </div>
-            <div class="field">
-              <label for="m1MinutesInline">分</label>
-              <input id="m1MinutesInline" type="number" min="0" max="59" value="30" />
+              <label for="leftTypeInline">時間の決め方</label>
+              <select id="leftTypeInline">
+                <option value="relative">相対（〇日〇時間〇分後）</option>
+                <option value="absolute">絶対（日時指定）</option>
+              </select>
             </div>
           </div>
 
-          <div class="field">
-            <label for="m1ColorInline">色</label>
-            <input id="m1ColorInline" type="color" value="#ff69b4" />
+          <div id="leftRelativeInlineSection" class="section">
+            <div class="section-title">相対</div>
+            <div class="row equal-3">
+              <div class="field">
+                <label for="leftDaysInline">日</label>
+                <input id="leftDaysInline" type="number" min="0" max="365" value="0" />
+              </div>
+              <div class="field">
+                <label for="leftHoursInline">時間</label>
+                <input id="leftHoursInline" type="number" min="0" max="23" value="0" />
+              </div>
+              <div class="field">
+                <label for="leftMinutesInline">分</label>
+                <input id="leftMinutesInline" type="number" min="0" max="59" value="30" />
+              </div>
+            </div>
           </div>
 
-          <div id="m1InlineHint" class="hint"></div>
-
-          <div class="btn-row">
-            <button id="m1RestartBtn" class="btn-primary">このモードだけ再スタート</button>
+          <div id="leftAbsoluteInlineSection" class="section hidden">
+            <div class="section-title">絶対</div>
+            <div class="row equal-2">
+              <div class="field">
+                <label for="leftDateInline">日付</label>
+                <input id="leftDateInline" type="date" />
+              </div>
+              <div class="field">
+                <label for="leftTimeInline">時刻</label>
+                <input id="leftTimeInline" type="time" step="60" />
+              </div>
+            </div>
           </div>
+
+          <div class="section">
+            <div class="section-title">色</div>
+            <div class="field">
+              <label for="leftColorInline">到達色</label>
+              <input id="leftColorInline" type="color" value="#ff69b4" />
+            </div>
+          </div>
+
+          <div id="leftInlineHint" class="hint"></div>
+          <button id="restartLeftBtn" class="restart-btn">左だけ再スタート</button>
         </div>
       </div>
 
-      <!-- RIGHT / MODE 2 -->
-      <div id="pane2" class="mode-pane">
-        <div class="pane-base"></div>
-        <div id="fill2" class="pane-fill"></div>
-        <div class="pane-ui">
-          <div class="pane-top">
-            <div class="pane-title">モード2</div>
-            <div id="status2" class="pane-status">待機中</div>
-          </div>
-          <div id="time2" class="pane-time">00:00</div>
-        </div>
-        <div id="tap2" class="tap-layer">
-          <div class="tap-message">タップしてこのモードだけ再設定</div>
+      <div id="paneRight" class="pane">
+        <div class="base"></div>
+        <div id="fillRight" class="fill"></div>
+        <div id="tapRight" class="tap-layer">
+          <div class="tap-pill">タップして再設定</div>
         </div>
 
-        <!-- inline setup for mode2 -->
-        <div id="inlineSetup2" class="inline-setup">
-          <h3>モード2を再設定</h3>
-          <div class="small-note">もう片方は止まらず進み続けます</div>
+        <div id="inlineRight" class="inline-setup">
+          <h3 class="inline-title">右を再設定</h3>
+          <div class="small-note">左は止まらず進み続けます</div>
 
-          <div class="field-row two">
+          <div class="section">
+            <div class="section-title">方式</div>
             <div class="field">
-              <label for="m2DateInline">日付</label>
-              <input id="m2DateInline" type="date" />
-            </div>
-            <div class="field">
-              <label for="m2TimeInline">時刻</label>
-              <input id="m2TimeInline" type="time" step="60" />
+              <label for="rightTypeInline">時間の決め方</label>
+              <select id="rightTypeInline">
+                <option value="absolute">絶対（日時指定）</option>
+                <option value="relative">相対（〇日〇時間〇分後）</option>
+              </select>
             </div>
           </div>
 
-          <div class="field">
-            <label for="m2ColorInline">色</label>
-            <input id="m2ColorInline" type="color" value="#8debd7" />
+          <div id="rightRelativeInlineSection" class="section hidden">
+            <div class="section-title">相対</div>
+            <div class="row equal-3">
+              <div class="field">
+                <label for="rightDaysInline">日</label>
+                <input id="rightDaysInline" type="number" min="0" max="365" value="0" />
+              </div>
+              <div class="field">
+                <label for="rightHoursInline">時間</label>
+                <input id="rightHoursInline" type="number" min="0" max="23" value="0" />
+              </div>
+              <div class="field">
+                <label for="rightMinutesInline">分</label>
+                <input id="rightMinutesInline" type="number" min="0" max="59" value="30" />
+              </div>
+            </div>
           </div>
 
-          <div id="m2InlineHint" class="hint"></div>
-
-          <div class="btn-row">
-            <button id="m2RestartBtn" class="btn-primary">このモードだけ再スタート</button>
+          <div id="rightAbsoluteInlineSection" class="section">
+            <div class="section-title">絶対</div>
+            <div class="row equal-2">
+              <div class="field">
+                <label for="rightDateInline">日付</label>
+                <input id="rightDateInline" type="date" />
+              </div>
+              <div class="field">
+                <label for="rightTimeInline">時刻</label>
+                <input id="rightTimeInline" type="time" step="60" />
+              </div>
+            </div>
           </div>
+
+          <div class="section">
+            <div class="section-title">色</div>
+            <div class="field">
+              <label for="rightColorInline">到達色</label>
+              <input id="rightColorInline" type="color" value="#8debd7" />
+            </div>
+          </div>
+
+          <div id="rightInlineHint" class="hint"></div>
+          <button id="restartRightBtn" class="restart-btn">右だけ再スタート</button>
         </div>
       </div>
     </section>
@@ -556,65 +616,79 @@
       setupScreen: document.getElementById('setupScreen'),
       timerScreen: document.getElementById('timerScreen'),
       setupGrid: document.getElementById('setupGrid'),
-      startAllBtn: document.getElementById('startAllBtn'),
+      startBtn: document.getElementById('startBtn'),
 
-      mode2Enabled: document.getElementById('mode2Enabled'),
-      mode2SetupCard: document.getElementById('mode2SetupCard'),
+      rightEnabled: document.getElementById('rightEnabled'),
+      rightCard: document.getElementById('rightCard'),
 
-      m1Days: document.getElementById('m1Days'),
-      m1Hours: document.getElementById('m1Hours'),
-      m1Minutes: document.getElementById('m1Minutes'),
-      m1Color: document.getElementById('m1Color'),
-      m1Hint: document.getElementById('m1Hint'),
+      leftType: document.getElementById('leftType'),
+      leftRelativeSection: document.getElementById('leftRelativeSection'),
+      leftAbsoluteSection: document.getElementById('leftAbsoluteSection'),
+      leftDays: document.getElementById('leftDays'),
+      leftHours: document.getElementById('leftHours'),
+      leftMinutes: document.getElementById('leftMinutes'),
+      leftDate: document.getElementById('leftDate'),
+      leftTime: document.getElementById('leftTime'),
+      leftColor: document.getElementById('leftColor'),
+      leftHint: document.getElementById('leftHint'),
 
-      m2Date: document.getElementById('m2Date'),
-      m2Time: document.getElementById('m2Time'),
-      m2Color: document.getElementById('m2Color'),
-      m2Hint: document.getElementById('m2Hint'),
+      rightType: document.getElementById('rightType'),
+      rightRelativeSection: document.getElementById('rightRelativeSection'),
+      rightAbsoluteSection: document.getElementById('rightAbsoluteSection'),
+      rightDays: document.getElementById('rightDays'),
+      rightHours: document.getElementById('rightHours'),
+      rightMinutes: document.getElementById('rightMinutes'),
+      rightDate: document.getElementById('rightDate'),
+      rightTime: document.getElementById('rightTime'),
+      rightColor: document.getElementById('rightColor'),
+      rightHint: document.getElementById('rightHint'),
 
-      pane1: document.getElementById('pane1'),
-      pane2: document.getElementById('pane2'),
-      fill1: document.getElementById('fill1'),
-      fill2: document.getElementById('fill2'),
-      status1: document.getElementById('status1'),
-      status2: document.getElementById('status2'),
-      time1: document.getElementById('time1'),
-      time2: document.getElementById('time2'),
-      tap1: document.getElementById('tap1'),
-      tap2: document.getElementById('tap2'),
+      paneLeft: document.getElementById('paneLeft'),
+      paneRight: document.getElementById('paneRight'),
+      fillLeft: document.getElementById('fillLeft'),
+      fillRight: document.getElementById('fillRight'),
+      tapLeft: document.getElementById('tapLeft'),
+      tapRight: document.getElementById('tapRight'),
 
-      inlineSetup1: document.getElementById('inlineSetup1'),
-      inlineSetup2: document.getElementById('inlineSetup2'),
+      inlineLeft: document.getElementById('inlineLeft'),
+      inlineRight: document.getElementById('inlineRight'),
 
-      m1DaysInline: document.getElementById('m1DaysInline'),
-      m1HoursInline: document.getElementById('m1HoursInline'),
-      m1MinutesInline: document.getElementById('m1MinutesInline'),
-      m1ColorInline: document.getElementById('m1ColorInline'),
-      m1InlineHint: document.getElementById('m1InlineHint'),
-      m1RestartBtn: document.getElementById('m1RestartBtn'),
+      leftTypeInline: document.getElementById('leftTypeInline'),
+      leftRelativeInlineSection: document.getElementById('leftRelativeInlineSection'),
+      leftAbsoluteInlineSection: document.getElementById('leftAbsoluteInlineSection'),
+      leftDaysInline: document.getElementById('leftDaysInline'),
+      leftHoursInline: document.getElementById('leftHoursInline'),
+      leftMinutesInline: document.getElementById('leftMinutesInline'),
+      leftDateInline: document.getElementById('leftDateInline'),
+      leftTimeInline: document.getElementById('leftTimeInline'),
+      leftColorInline: document.getElementById('leftColorInline'),
+      leftInlineHint: document.getElementById('leftInlineHint'),
+      restartLeftBtn: document.getElementById('restartLeftBtn'),
 
-      m2DateInline: document.getElementById('m2DateInline'),
-      m2TimeInline: document.getElementById('m2TimeInline'),
-      m2ColorInline: document.getElementById('m2ColorInline'),
-      m2InlineHint: document.getElementById('m2InlineHint'),
-      m2RestartBtn: document.getElementById('m2RestartBtn'),
+      rightTypeInline: document.getElementById('rightTypeInline'),
+      rightRelativeInlineSection: document.getElementById('rightRelativeInlineSection'),
+      rightAbsoluteInlineSection: document.getElementById('rightAbsoluteInlineSection'),
+      rightDaysInline: document.getElementById('rightDaysInline'),
+      rightHoursInline: document.getElementById('rightHoursInline'),
+      rightMinutesInline: document.getElementById('rightMinutesInline'),
+      rightDateInline: document.getElementById('rightDateInline'),
+      rightTimeInline: document.getElementById('rightTimeInline'),
+      rightColorInline: document.getElementById('rightColorInline'),
+      rightInlineHint: document.getElementById('rightInlineHint'),
+      restartRightBtn: document.getElementById('restartRightBtn'),
     };
 
     const state = {
-      mode2Enabled: true,
-      view: 'setup', // setup | timer
-      mode1: createModeState('mode1'),
-      mode2: createModeState('mode2'),
+      rightEnabled: true,
+      left: createModeState(),
+      right: createModeState(),
       rafId: null
     };
 
-    function createModeState(name) {
+    function createModeState() {
       return {
-        name,
-        enabled: true,
         running: false,
         finished: false,
-        inInlineSetup: false,
         startMs: null,
         endMs: null,
         durationMs: null,
@@ -622,7 +696,7 @@
       };
     }
 
-    function now() {
+    function nowMs() {
       return Date.now();
     }
 
@@ -630,61 +704,43 @@
       return String(n).padStart(2, '0');
     }
 
-    function formatRemaining(ms) {
-      const totalSec = Math.max(0, Math.ceil(ms / 1000));
-      const d = Math.floor(totalSec / 86400);
-      const h = Math.floor((totalSec % 86400) / 3600);
-      const m = Math.floor((totalSec % 3600) / 60);
-      const s = totalSec % 60;
-
-      if (d > 0) return `${d}d ${pad(h)}:${pad(m)}:${pad(s)}`;
-      return `${pad(h)}:${pad(m)}:${pad(s)}`;
-    }
-
-    function setDefaultMode2DateTime(targetDateInput, targetTimeInput) {
+    function setDefaultAbsolute(dateInput, timeInput) {
       const dt = new Date();
       dt.setSeconds(0, 0);
-
-      // 5分単位で切り上げ
       const mins = dt.getMinutes();
       const add = (5 - (mins % 5)) % 5 || 5;
       dt.setMinutes(mins + add);
 
-      const yyyy = dt.getFullYear();
-      const mm = pad(dt.getMonth() + 1);
-      const dd = pad(dt.getDate());
-      const hh = pad(dt.getHours());
-      const mi = pad(dt.getMinutes());
-
-      targetDateInput.value = `${yyyy}-${mm}-${dd}`;
-      targetTimeInput.value = `${hh}:${mi}`;
+      dateInput.value = `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+      timeInput.value = `${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
     }
 
-    function syncInlineFromMain() {
-      els.m1DaysInline.value = els.m1Days.value;
-      els.m1HoursInline.value = els.m1Hours.value;
-      els.m1MinutesInline.value = els.m1Minutes.value;
-      els.m1ColorInline.value = els.m1Color.value;
-
-      els.m2DateInline.value = els.m2Date.value;
-      els.m2TimeInline.value = els.m2Time.value;
-      els.m2ColorInline.value = els.m2Color.value;
+    function setVisibility(el, show) {
+      el.classList.toggle('hidden', !show);
     }
 
-    function syncMainFromInline1() {
-      els.m1Days.value = els.m1DaysInline.value;
-      els.m1Hours.value = els.m1HoursInline.value;
-      els.m1Minutes.value = els.m1MinutesInline.value;
-      els.m1Color.value = els.m1ColorInline.value;
+    function syncTypeSections(prefix) {
+      const type = els[`${prefix}Type`].value;
+      setVisibility(els[`${prefix}RelativeSection`], type === 'relative');
+      setVisibility(els[`${prefix}AbsoluteSection`], type === 'absolute');
     }
 
-    function syncMainFromInline2() {
-      els.m2Date.value = els.m2DateInline.value;
-      els.m2Time.value = els.m2TimeInline.value;
-      els.m2Color.value = els.m2ColorInline.value;
+    function syncTypeSectionsInline(prefix) {
+      const type = els[`${prefix}TypeInline`].value;
+      setVisibility(els[`${prefix}RelativeInlineSection`], type === 'relative');
+      setVisibility(els[`${prefix}AbsoluteInlineSection`], type === 'absolute');
     }
 
-    function validateMode1(daysEl, hoursEl, minutesEl, hintEl) {
+    function updateLayout() {
+      state.rightEnabled = els.rightEnabled.checked;
+      els.rightCard.classList.toggle('hidden', !state.rightEnabled);
+      els.setupGrid.classList.toggle('single', !state.rightEnabled);
+
+      els.timerScreen.classList.toggle('single', !state.rightEnabled);
+      els.paneRight.classList.toggle('hidden', !state.rightEnabled);
+    }
+
+    function validateRelative(daysEl, hoursEl, minutesEl, hintEl) {
       const d = Number(daysEl.value || 0);
       const h = Number(hoursEl.value || 0);
       const m = Number(minutesEl.value || 0);
@@ -694,312 +750,269 @@
         return null;
       }
 
-      const durationMs = (((d * 24) + h) * 60 + m) * 60 * 1000;
+      const durationMs = ((((d * 24) + h) * 60) + m) * 60 * 1000;
       if (durationMs <= 0) {
         hintEl.textContent = '1分以上にしてください';
         return null;
       }
 
       hintEl.textContent = '';
-      return durationMs;
+      return {
+        startMs: nowMs(),
+        endMs: nowMs() + durationMs,
+        durationMs
+      };
     }
 
-    function validateMode2(dateEl, timeEl, hintEl) {
-      const dateStr = dateEl.value;
-      const timeStr = timeEl.value;
-
-      if (!dateStr || !timeStr) {
+    function validateAbsolute(dateEl, timeEl, hintEl) {
+      if (!dateEl.value || !timeEl.value) {
         hintEl.textContent = '日付と時刻を入れてください';
         return null;
       }
 
-      const target = new Date(`${dateStr}T${timeStr}:00`);
-      const targetMs = target.getTime();
+      const target = new Date(`${dateEl.value}T${timeEl.value}:00`);
+      const endMs = target.getTime();
 
-      if (Number.isNaN(targetMs)) {
-        hintEl.textContent = '日時の形式が不正です';
+      if (Number.isNaN(endMs)) {
+        hintEl.textContent = '日時が不正です';
         return null;
       }
 
-      if (targetMs <= now()) {
-        hintEl.textContent = '現在より未来の時刻を入れてください';
+      const startMs = nowMs();
+      const durationMs = endMs - startMs;
+
+      if (durationMs <= 0) {
+        hintEl.textContent = '未来の日時を入れてください';
         return null;
       }
 
       hintEl.textContent = '';
-      return targetMs;
+      return { startMs, endMs, durationMs };
     }
 
-    function startMode1FromMain() {
-      const durationMs = validateMode1(els.m1Days, els.m1Hours, els.m1Minutes, els.m1Hint);
-      if (!durationMs) return false;
+    function readConfig(prefix, inline = false) {
+      const typeEl = els[inline ? `${prefix}TypeInline` : `${prefix}Type`];
+      const colorEl = els[inline ? `${prefix}ColorInline` : `${prefix}Color`];
+      const hintEl = els[inline ? `${prefix}InlineHint` : `${prefix}Hint`];
 
-      const startMs = now();
-      state.mode1.running = true;
-      state.mode1.finished = false;
-      state.mode1.inInlineSetup = false;
-      state.mode1.startMs = startMs;
-      state.mode1.endMs = startMs + durationMs;
-      state.mode1.durationMs = durationMs;
-      state.mode1.color = els.m1Color.value;
+      const type = typeEl.value;
+      let timing = null;
 
-      els.fill1.style.background = state.mode1.color;
-      els.pane1.classList.remove('finished-blink');
-      els.tap1.classList.remove('active');
-      els.inlineSetup1.classList.remove('active');
-      return true;
+      if (type === 'relative') {
+        timing = validateRelative(
+          els[inline ? `${prefix}DaysInline` : `${prefix}Days`],
+          els[inline ? `${prefix}HoursInline` : `${prefix}Hours`],
+          els[inline ? `${prefix}MinutesInline` : `${prefix}Minutes`],
+          hintEl
+        );
+      } else {
+        timing = validateAbsolute(
+          els[inline ? `${prefix}DateInline` : `${prefix}Date`],
+          els[inline ? `${prefix}TimeInline` : `${prefix}Time`],
+          hintEl
+        );
+      }
+
+      if (!timing) return null;
+
+      return {
+        type,
+        color: colorEl.value,
+        ...timing
+      };
     }
 
-    function startMode2FromMain() {
-      const targetMs = validateMode2(els.m2Date, els.m2Time, els.m2Hint);
-      if (!targetMs) return false;
+    function applyMode(modeState, fillEl, paneEl, tapEl, inlineEl, config) {
+      modeState.running = true;
+      modeState.finished = false;
+      modeState.startMs = config.startMs;
+      modeState.endMs = config.endMs;
+      modeState.durationMs = config.durationMs;
+      modeState.color = config.color;
 
-      const startMs = now();
-      state.mode2.running = true;
-      state.mode2.finished = false;
-      state.mode2.inInlineSetup = false;
-      state.mode2.startMs = startMs;
-      state.mode2.endMs = targetMs;
-      state.mode2.durationMs = targetMs - startMs;
-      state.mode2.color = els.m2Color.value;
-
-      els.fill2.style.background = state.mode2.color;
-      els.pane2.classList.remove('finished-blink');
-      els.tap2.classList.remove('active');
-      els.inlineSetup2.classList.remove('active');
-      return true;
+      fillEl.style.background = config.color;
+      paneEl.classList.remove('blink');
+      tapEl.classList.remove('active');
+      inlineEl.classList.remove('active');
     }
 
-    function restartMode1Inline() {
-      const durationMs = validateMode1(
-        els.m1DaysInline,
-        els.m1HoursInline,
-        els.m1MinutesInline,
-        els.m1InlineHint
-      );
-      if (!durationMs) return false;
-
-      syncMainFromInline1();
-
-      const startMs = now();
-      state.mode1.running = true;
-      state.mode1.finished = false;
-      state.mode1.inInlineSetup = false;
-      state.mode1.startMs = startMs;
-      state.mode1.endMs = startMs + durationMs;
-      state.mode1.durationMs = durationMs;
-      state.mode1.color = els.m1ColorInline.value;
-
-      els.fill1.style.background = state.mode1.color;
-      els.pane1.classList.remove('finished-blink');
-      els.tap1.classList.remove('active');
-      els.inlineSetup1.classList.remove('active');
-      return true;
-    }
-
-    function restartMode2Inline() {
-      const targetMs = validateMode2(
-        els.m2DateInline,
-        els.m2TimeInline,
-        els.m2InlineHint
-      );
-      if (!targetMs) return false;
-
-      syncMainFromInline2();
-
-      const startMs = now();
-      state.mode2.running = true;
-      state.mode2.finished = false;
-      state.mode2.inInlineSetup = false;
-      state.mode2.startMs = startMs;
-      state.mode2.endMs = targetMs;
-      state.mode2.durationMs = targetMs - startMs;
-      state.mode2.color = els.m2ColorInline.value;
-
-      els.fill2.style.background = state.mode2.color;
-      els.pane2.classList.remove('finished-blink');
-      els.tap2.classList.remove('active');
-      els.inlineSetup2.classList.remove('active');
-      return true;
-    }
-
-    function showTimerScreen() {
-      state.view = 'timer';
+    function openTimer() {
       els.setupScreen.style.display = 'none';
       els.timerScreen.classList.add('active');
-
-      if (state.mode2Enabled) {
-        els.timerScreen.classList.remove('single');
-        els.pane2.classList.remove('hidden');
-      } else {
-        els.timerScreen.classList.add('single');
-        els.pane2.classList.add('hidden');
-      }
+      updateLayout();
     }
 
-    function showSetupScreen() {
-      state.view = 'setup';
-      els.setupScreen.style.display = 'flex';
-      els.timerScreen.classList.remove('active');
+    function progress(mode) {
+      if (!mode.durationMs || !mode.startMs) return 0;
+      return Math.max(0, Math.min(1, (nowMs() - mode.startMs) / mode.durationMs));
     }
 
-    function updateSetupLayout() {
-      state.mode2Enabled = els.mode2Enabled.checked;
-
-      if (state.mode2Enabled) {
-        els.mode2SetupCard.classList.remove('hidden');
-        els.setupGrid.classList.remove('single');
-      } else {
-        els.mode2SetupCard.classList.add('hidden');
-        els.setupGrid.classList.add('single');
-      }
-    }
-
-    function finishMode(mode, paneEl, tapEl, statusEl) {
+    function finishMode(mode, paneEl, tapEl, fillEl) {
       mode.running = false;
       mode.finished = true;
-      paneEl.classList.add('finished-blink');
+      fillEl.style.height = '100%';
+      paneEl.classList.add('blink');
       tapEl.classList.add('active');
-      statusEl.textContent = '完了';
     }
 
-    function progressOf(mode) {
-      if (!mode.startMs || !mode.endMs || !mode.durationMs || mode.durationMs <= 0) return 0;
-      const p = (now() - mode.startMs) / mode.durationMs;
-      return Math.max(0, Math.min(1, p));
-    }
-
-    function updatePane(mode, fillEl, timeEl, statusEl, paneEl, tapEl, label) {
+    function updateOne(mode, paneEl, tapEl, fillEl) {
       if (!mode.running && !mode.finished) {
         fillEl.style.height = '0%';
-        statusEl.textContent = '待機中';
-        timeEl.textContent = '--:--';
         return;
       }
 
       if (mode.running) {
-        const remain = mode.endMs - now();
-        const p = progressOf(mode);
+        const remain = mode.endMs - nowMs();
+        const p = progress(mode);
         fillEl.style.height = `${p * 100}%`;
 
-        statusEl.textContent = label;
-        timeEl.textContent = formatRemaining(remain);
-
         if (remain <= 0) {
-          fillEl.style.height = '100%';
-          timeEl.textContent = '00:00:00';
-          finishMode(mode, paneEl, tapEl, statusEl);
+          finishMode(mode, paneEl, tapEl, fillEl);
         }
         return;
       }
 
       if (mode.finished) {
         fillEl.style.height = '100%';
-        timeEl.textContent = '00:00:00';
-        statusEl.textContent = '完了';
       }
     }
 
     function tick() {
-      updatePane(
-        state.mode1,
-        els.fill1,
-        els.time1,
-        els.status1,
-        els.pane1,
-        els.tap1,
-        '進行中'
-      );
+      updateOne(state.left, els.paneLeft, els.tapLeft, els.fillLeft);
 
-      if (state.mode2Enabled) {
-        updatePane(
-          state.mode2,
-          els.fill2,
-          els.time2,
-          els.status2,
-          els.pane2,
-          els.tap2,
-          '進行中'
-        );
+      if (state.rightEnabled) {
+        updateOne(state.right, els.paneRight, els.tapRight, els.fillRight);
       }
 
       state.rafId = requestAnimationFrame(tick);
     }
 
-    function startLoop() {
-      if (state.rafId) cancelAnimationFrame(state.rafId);
-      tick();
+    function copyMainToInline(prefix) {
+      els[`${prefix}TypeInline`].value = els[`${prefix}Type`].value;
+      els[`${prefix}ColorInline`].value = els[`${prefix}Color`].value;
+
+      els[`${prefix}DaysInline`].value = els[`${prefix}Days`].value;
+      els[`${prefix}HoursInline`].value = els[`${prefix}Hours`].value;
+      els[`${prefix}MinutesInline`].value = els[`${prefix}Minutes`].value;
+
+      els[`${prefix}DateInline`].value = els[`${prefix}Date`].value;
+      els[`${prefix}TimeInline`].value = els[`${prefix}Time`].value;
+
+      syncTypeSectionsInline(prefix);
+    }
+
+    function copyInlineToMain(prefix) {
+      els[`${prefix}Type`].value = els[`${prefix}TypeInline`].value;
+      els[`${prefix}Color`].value = els[`${prefix}ColorInline`].value;
+
+      els[`${prefix}Days`].value = els[`${prefix}DaysInline`].value;
+      els[`${prefix}Hours`].value = els[`${prefix}HoursInline`].value;
+      els[`${prefix}Minutes`].value = els[`${prefix}MinutesInline`].value;
+
+      els[`${prefix}Date`].value = els[`${prefix}DateInline`].value;
+      els[`${prefix}Time`].value = els[`${prefix}TimeInline`].value;
+
+      syncTypeSections(prefix);
+    }
+
+    function bindMirrors(prefix) {
+      const pairs = [
+        [`${prefix}Type`, `${prefix}TypeInline`],
+        [`${prefix}Color`, `${prefix}ColorInline`],
+        [`${prefix}Days`, `${prefix}DaysInline`],
+        [`${prefix}Hours`, `${prefix}HoursInline`],
+        [`${prefix}Minutes`, `${prefix}MinutesInline`],
+        [`${prefix}Date`, `${prefix}DateInline`],
+        [`${prefix}Time`, `${prefix}TimeInline`],
+      ];
+
+      pairs.forEach(([a, b]) => {
+        els[a].addEventListener('input', () => { els[b].value = els[a].value; });
+        els[b].addEventListener('input', () => { els[a].value = els[b].value; });
+      });
+
+      els[`${prefix}Type`].addEventListener('change', () => syncTypeSections(prefix));
+      els[`${prefix}TypeInline`].addEventListener('change', () => syncTypeSectionsInline(prefix));
     }
 
     function init() {
-      setDefaultMode2DateTime(els.m2Date, els.m2Time);
-      syncInlineFromMain();
-      updateSetupLayout();
-      showSetupScreen();
-      startLoop();
+      setDefaultAbsolute(els.leftDate, els.leftTime);
+      setDefaultAbsolute(els.rightDate, els.rightTime);
+      setDefaultAbsolute(els.leftDateInline, els.leftTimeInline);
+      setDefaultAbsolute(els.rightDateInline, els.rightTimeInline);
+
+      syncTypeSections('left');
+      syncTypeSections('right');
+      syncTypeSectionsInline('left');
+      syncTypeSectionsInline('right');
+      updateLayout();
+
+      bindMirrors('left');
+      bindMirrors('right');
+
+      els.rightEnabled.addEventListener('change', updateLayout);
+
+      els.startBtn.addEventListener('click', () => {
+        const leftConfig = readConfig('left', false);
+        if (!leftConfig) return;
+
+        let rightConfig = null;
+        if (state.rightEnabled) {
+          rightConfig = readConfig('right', false);
+          if (!rightConfig) return;
+        }
+
+        applyMode(state.left, els.fillLeft, els.paneLeft, els.tapLeft, els.inlineLeft, leftConfig);
+
+        if (state.rightEnabled && rightConfig) {
+          applyMode(state.right, els.fillRight, els.paneRight, els.tapRight, els.inlineRight, rightConfig);
+        } else {
+          state.right.running = false;
+          state.right.finished = false;
+          state.right.startMs = null;
+          state.right.endMs = null;
+          state.right.durationMs = null;
+          els.fillRight.style.height = '0%';
+          els.paneRight.classList.remove('blink');
+          els.tapRight.classList.remove('active');
+          els.inlineRight.classList.remove('active');
+        }
+
+        openTimer();
+      });
+
+      els.tapLeft.addEventListener('click', () => {
+        if (!state.left.finished) return;
+        copyMainToInline('left');
+        els.tapLeft.classList.remove('active');
+        els.paneLeft.classList.remove('blink');
+        els.inlineLeft.classList.add('active');
+      });
+
+      els.tapRight.addEventListener('click', () => {
+        if (!state.right.finished) return;
+        copyMainToInline('right');
+        els.tapRight.classList.remove('active');
+        els.paneRight.classList.remove('blink');
+        els.inlineRight.classList.add('active');
+      });
+
+      els.restartLeftBtn.addEventListener('click', () => {
+        const config = readConfig('left', true);
+        if (!config) return;
+        copyInlineToMain('left');
+        applyMode(state.left, els.fillLeft, els.paneLeft, els.tapLeft, els.inlineLeft, config);
+      });
+
+      els.restartRightBtn.addEventListener('click', () => {
+        const config = readConfig('right', true);
+        if (!config) return;
+        copyInlineToMain('right');
+        applyMode(state.right, els.fillRight, els.paneRight, els.tapRight, els.inlineRight, config);
+      });
+
+      tick();
     }
-
-    /* ---------- events ---------- */
-    els.mode2Enabled.addEventListener('change', updateSetupLayout);
-
-    els.startAllBtn.addEventListener('click', () => {
-      const ok1 = startMode1FromMain();
-      if (!ok1) return;
-
-      let ok2 = true;
-      if (els.mode2Enabled.checked) {
-        ok2 = startMode2FromMain();
-      } else {
-        state.mode2.running = false;
-        state.mode2.finished = false;
-        state.mode2.inInlineSetup = false;
-      }
-
-      if (!ok2) return;
-
-      syncInlineFromMain();
-      showTimerScreen();
-    });
-
-    els.tap1.addEventListener('click', () => {
-      if (!state.mode1.finished) return;
-      syncInlineFromMain();
-      state.mode1.inInlineSetup = true;
-      els.inlineSetup1.classList.add('active');
-      els.tap1.classList.remove('active');
-      els.pane1.classList.remove('finished-blink');
-    });
-
-    els.tap2.addEventListener('click', () => {
-      if (!state.mode2.finished) return;
-      syncInlineFromMain();
-      state.mode2.inInlineSetup = true;
-      els.inlineSetup2.classList.add('active');
-      els.tap2.classList.remove('active');
-      els.pane2.classList.remove('finished-blink');
-    });
-
-    els.m1RestartBtn.addEventListener('click', () => {
-      restartMode1Inline();
-    });
-
-    els.m2RestartBtn.addEventListener('click', () => {
-      restartMode2Inline();
-    });
-
-    // メイン入力とインライン入力を相互反映
-    [
-      ['m1Days', 'm1DaysInline'],
-      ['m1Hours', 'm1HoursInline'],
-      ['m1Minutes', 'm1MinutesInline'],
-      ['m1Color', 'm1ColorInline'],
-      ['m2Date', 'm2DateInline'],
-      ['m2Time', 'm2TimeInline'],
-      ['m2Color', 'm2ColorInline']
-    ].forEach(([a, b]) => {
-      els[a].addEventListener('input', () => { els[b].value = els[a].value; });
-      els[b].addEventListener('input', () => { els[a].value = els[b].value; });
-    });
 
     init();
   </script>
