@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Challenge App</title>
+  <style>
+    :root {
+      --bg: #111111;
+      --panel: #1c1c1c;
+      --panel-2: #262626;
+      --text: #f4f4f4;
+      --muted: #b8b8b8;
+      --line: #333333;
+      --accent: #ff7aa8;
+      --accent-2: #7ee7d8;
+      --danger: #ff7676;
+      --success: #7de38d;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", sans-serif;
+      min-height: 100%;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: min(720px, 100vw);
+      min-height: 100vh;
+      padding: 16px;
+      padding-top: max(16px, env(safe-area-inset-top));
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+
+    .screen {
+      display: none;
+      animation: fade .18s ease;
+    }
+    .screen.active { display: block; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .header {
+      margin-bottom: 16px;
+      padding: 18px 18px 14px;
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      margin: 0 0 6px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .composer {
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: #101010;
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255, 122, 168, 0.15);
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .06s ease, opacity .12s ease, background .12s ease;
+    }
+
+    button:active { transform: scale(0.985); }
+
+    .btn-main {
+      background: var(--accent);
+      color: #111;
+      min-width: 92px;
+    }
+
+    .btn-sub {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #102313;
+      font-size: 20px;
+      padding: 18px 20px;
+    }
+
+    .btn-later {
+      background: #2b2b2b;
+      color: var(--text);
+      border: 1px solid var(--line);
+      font-size: 18px;
+      padding: 18px 20px;
+    }
+
+    .tasks {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .task {
+      padding: 14px;
+    }
+
+    .task-top {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .task-name {
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.35;
+      margin: 0 0 6px;
+      word-break: break-word;
+    }
+
+    .task-meta {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .task-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .task-actions button {
+      padding: 10px 12px;
+      font-size: 14px;
+      border-radius: 12px;
+    }
+
+    .challenge-btn {
+      background: var(--accent-2);
+      color: #0d2521;
+      font-weight: 800;
+    }
+
+    .mini-danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid rgba(255,118,118,0.4);
+    }
+
+    .mini-plain {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+
+    .empty {
+      padding: 22px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+    }
+
+    .challenge-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .challenge-head {
+      padding: 16px;
+    }
+
+    .back-btn {
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .challenge-title {
+      font-size: 28px;
+      line-height: 1.35;
+      font-weight: 800;
+      margin: 0;
+      word-break: break-word;
+    }
+
+    .stopwatch {
+      padding: 22px 16px;
+      text-align: center;
+      background: linear-gradient(180deg, #171717 0%, #111111 100%);
+    }
+
+    .stopwatch-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stopwatch-time {
+      font-size: clamp(42px, 11vw, 72px);
+      font-weight: 900;
+      letter-spacing: 0.03em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .history {
+      padding: 16px;
+    }
+
+    .history-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 0 0 12px;
+    }
+
+    .record-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .record {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .record-text {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .record-text strong {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .record button {
+      white-space: nowrap;
+      padding: 10px 12px;
+      font-size: 13px;
+      border-radius: 12px;
+    }
+
+    @media (max-width: 560px) {
+      .row { flex-direction: column; }
+      .decision { grid-template-columns: 1fr; }
+      .task-top { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="listScreen" class="screen active">
+      <div class="header card">
+        <h1 class="title">Challenge List</h1>
+        <p class="subtitle">今日は 2026年4月23日。タスクを自由に追加して、できたものは一番下へ回します。</p>
+      </div>
+
+      <div class="composer card">
+        <div class="row">
+          <input id="newTaskInput" type="text" placeholder="新しいタスク名を入力" maxlength="80" />
+          <button id="addTaskBtn" class="btn-main">追加</button>
+        </div>
+      </div>
+
+      <div id="taskList" class="tasks"></div>
+    </section>
+
+    <section id="challengeScreen" class="screen">
+      <div class="challenge-wrap">
+        <div class="challenge-head card">
+          <button id="backToListBtn" class="btn-sub back-btn">一覧へ戻る</button>
+          <h2 id="challengeTitle" class="challenge-title"></h2>
+        </div>
+
+        <div class="stopwatch card">
+          <div class="stopwatch-label">チャレンジ中</div>
+          <div id="stopwatchTime" class="stopwatch-time">00:00</div>
+        </div>
+
+        <div class="decision">
+          <button id="laterBtn" class="btn-later">また今後</button>
+          <button id="successBtn" class="btn-success">成功！</button>
+        </div>
+
+        <div class="history card">
+          <h3 class="history-title">チャレンジ記録</h3>
+          <div id="recordList" class="record-list"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'challenge-app-v1';
+
+    const defaultData = {
+      tasks: [
+        { id: crypto.randomUUID(), name: 'ストレッチ', records: [] },
+        { id: crypto.randomUUID(), name: '片づけ 5分', records: [] },
+        { id: crypto.randomUUID(), name: '本を読む', records: [] }
+      ]
+    };
+
+    let state = loadState();
+    let currentTaskId = null;
+    let challengeStartedAt = null;
+    let timerId = null;
+
+    const listScreen = document.getElementById('listScreen');
+    const challengeScreen = document.getElementById('challengeScreen');
+    const taskList = document.getElementById('taskList');
+    const newTaskInput = document.getElementById('newTaskInput');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const challengeTitle = document.getElementById('challengeTitle');
+    const stopwatchTime = document.getElementById('stopwatchTime');
+    const recordList = document.getElementById('recordList');
+    const laterBtn = document.getElementById('laterBtn');
+    const successBtn = document.getElementById('successBtn');
+    const backToListBtn = document.getElementById('backToListBtn');
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(defaultData);
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.tasks)) return structuredClone(defaultData);
+        parsed.tasks = parsed.tasks.map(task => ({
+          id: task.id || crypto.randomUUID(),
+          name: typeof task.name === 'string' ? task.name : '無題タスク',
+          records: Array.isArray(task.records) ? task.records : []
+        }));
+        return parsed;
+      } catch {
+        return structuredClone(defaultData);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function showScreen(name) {
+      listScreen.classList.toggle('active', name === 'list');
+      challengeScreen.classList.toggle('active', name === 'challenge');
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function formatDuration(ms) {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}分${seconds}秒`;
+    }
+
+    function formatStopwatch(ms) {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      if (hours > 0) {
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function formatDateJP(dateInput) {
+      const date = new Date(dateInput);
+      return `${date.getMonth() + 1}月${date.getDate()}日`;
+    }
+
+    function daysAgo(dateInput) {
+      const then = new Date(dateInput);
+      const now = new Date();
+      const a = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const b = new Date(then.getFullYear(), then.getMonth(), then.getDate());
+      return Math.round((a - b) / 86400000);
+    }
+
+    function formatRecord(record) {
+      const days = daysAgo(record.completedAt);
+      return `${formatDateJP(record.completedAt)}（${days}日前）${formatDuration(record.durationMs)}`;
+    }
+
+    function averageDuration(records) {
+      if (!records.length) return null;
+      const avg = records.reduce((sum, r) => sum + r.durationMs, 0) / records.length;
+      const totalMinutes = Math.round(avg / 60000);
+      return `平均${totalMinutes}分`;
+    }
+
+    function getTaskById(id) {
+      return state.tasks.find(task => task.id === id);
+    }
+
+    function renderList() {
+      if (!state.tasks.length) {
+        taskList.innerHTML = '<div class="empty">まだタスクがありません</div>';
+        return;
+      }
+
+      taskList.innerHTML = state.tasks.map(task => {
+        const latest = task.records[0] ? `前回 ${formatRecord(task.records[0])}` : 'まだ成功記録なし';
+        const avg = averageDuration(task.records);
+        return `
+          <div class="task card">
+            <div class="task-top">
+              <div>
+                <div class="task-name">${escapeHtml(task.name)}</div>
+                <div class="task-meta">${escapeHtml(latest)}${avg ? ' ／ ' + escapeHtml(avg) : ''}</div>
+              </div>
+            </div>
+            <div class="task-actions">
+              <button class="challenge-btn" data-action="challenge" data-id="${task.id}">チャレンジ</button>
+              <button class="mini-plain" data-action="edit" data-id="${task.id}">名前変更</button>
+              <button class="mini-danger" data-action="delete" data-id="${task.id}">削除</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderChallenge(taskId) {
+      const task = getTaskById(taskId);
+      if (!task) return;
+      challengeTitle.textContent = task.name;
+
+      const records = task.records.slice(0, 3);
+      if (!records.length) {
+        recordList.innerHTML = '<div class="empty">まだ記録がありません</div>';
+        return;
+      }
+
+      recordList.innerHTML = records.map(record => `
+        <div class="record">
+          <div class="record-text">
+            <strong>成功記録</strong>
+            ${escapeHtml(formatRecord(record))}
+          </div>
+          <button class="mini-danger" data-action="delete-record" data-task-id="${task.id}" data-record-id="${record.id}">消す</button>
+        </div>
+      `).join('');
+    }
+
+    function addTask() {
+      const name = newTaskInput.value.trim();
+      if (!name) return;
+      state.tasks.push({ id: crypto.randomUUID(), name, records: [] });
+      newTaskInput.value = '';
+      saveState();
+      renderList();
+      newTaskInput.focus();
+    }
+
+    function editTask(taskId) {
+      const task = getTaskById(taskId);
+      if (!task) return;
+      const next = prompt('タスク名を変更', task.name);
+      if (next === null) return;
+      const name = next.trim();
+      if (!name) return;
+      task.name = name;
+      saveState();
+      renderList();
+      if (currentTaskId === taskId) renderChallenge(taskId);
+    }
+
+    function deleteTask(taskId) {
+      const task = getTaskById(taskId);
+      if (!task) return;
+      if (!confirm(`「${task.name}」を削除しますか？`)) return;
+      state.tasks = state.tasks.filter(task => task.id !== taskId);
+      saveState();
+      renderList();
+    }
+
+    function deleteRecord(taskId, recordId) {
+      const task = getTaskById(taskId);
+      if (!task) return;
+      task.records = task.records.filter(record => record.id !== recordId);
+      saveState();
+      renderChallenge(taskId);
+      renderList();
+    }
+
+    function startChallenge(taskId) {
+      currentTaskId = taskId;
+      challengeStartedAt = Date.now();
+      showScreen('challenge');
+      renderChallenge(taskId);
+      updateStopwatch();
+      clearInterval(timerId);
+      timerId = setInterval(updateStopwatch, 250);
+    }
+
+    function endChallengeSuccess() {
+      const task = getTaskById(currentTaskId);
+      if (!task || !challengeStartedAt) return;
+      const now = Date.now();
+      const durationMs = now - challengeStartedAt;
+      task.records.unshift({
+        id: crypto.randomUUID(),
+        completedAt: new Date(now).toISOString(),
+        durationMs
+      });
+      task.records = task.records.slice(0, 3);
+
+      const idx = state.tasks.findIndex(t => t.id === task.id);
+      if (idx >= 0) {
+        const [moved] = state.tasks.splice(idx, 1);
+        state.tasks.push(moved);
+      }
+
+      finishChallenge();
+      saveState();
+      renderList();
+      showScreen('list');
+    }
+
+    function endChallengeLater() {
+      finishChallenge();
+      renderList();
+      showScreen('list');
+    }
+
+    function finishChallenge() {
+      clearInterval(timerId);
+      timerId = null;
+      currentTaskId = null;
+      challengeStartedAt = null;
+      stopwatchTime.textContent = '00:00';
+    }
+
+    function updateStopwatch() {
+      if (!challengeStartedAt) {
+        stopwatchTime.textContent = '00:00';
+        return;
+      }
+      stopwatchTime.textContent = formatStopwatch(Date.now() - challengeStartedAt);
+    }
+
+    addTaskBtn.addEventListener('click', addTask);
+    newTaskInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addTask();
+    });
+
+    taskList.addEventListener('click', (e) => {
+      const button = e.target.closest('button');
+      if (!button) return;
+      const { action, id } = button.dataset;
+      if (action === 'challenge') startChallenge(id);
+      if (action === 'edit') editTask(id);
+      if (action === 'delete') deleteTask(id);
+    });
+
+    recordList.addEventListener('click', (e) => {
+      const button = e.target.closest('button');
+      if (!button) return;
+      const { action, taskId, recordId } = button.dataset;
+      if (action === 'delete-record') deleteRecord(taskId, recordId);
+    });
+
+    laterBtn.addEventListener('click', endChallengeLater);
+    successBtn.addEventListener('click', endChallengeSuccess);
+    backToListBtn.addEventListener('click', endChallengeLater);
+
+    renderList();
+  </script>
+</body>
+</html>
